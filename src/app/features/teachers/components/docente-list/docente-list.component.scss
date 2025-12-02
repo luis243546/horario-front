@@ -1,0 +1,410 @@
+// src/app/features/docentes/components/docente-list/docente-list.component.scss
+
+// Variables para mantener consistencia con el dashboard
+$primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+$primary-color: #4f46e5;
+$purple-color: #7c3aed;
+$success-color: #10b981;
+$warning-color: #f59e0b;
+$error-color: #ef4444;
+$text-primary: #111827;
+$text-secondary: #6b7280;
+$text-muted: #9ca3af;
+$bg-primary: #ffffff;
+$bg-secondary: #f9fafb;
+$bg-tertiary: #f3f4f6;
+$border-color: #e5e7eb;
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$border-radius: 0.75rem;
+$border-radius-lg: 1rem;
+
+// Overrides de Angular Material para mantener consistencia
+::ng-deep {
+  // Form fields personalizados
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      border-radius: $border-radius !important;
+
+      .mat-mdc-form-field-outline {
+        border-radius: $border-radius !important;
+        border-color: $border-color !important;
+
+        &.mat-mdc-form-field-outline-thick {
+          border-color: $primary-color !important;
+        }
+      }
+    }
+
+    .mat-mdc-form-field-label {
+      color: $text-secondary !important;
+    }
+
+    .mat-mdc-input-element {
+      color: $text-primary !important;
+    }
+  }
+
+  // Botones mejorados
+  .mat-mdc-raised-button {
+    border-radius: $border-radius !important;
+    box-shadow: $shadow-md !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+
+    &.mat-primary {
+      background: $primary-gradient !important;
+      color: white !important;
+
+      &:hover {
+        box-shadow: $shadow-lg !important;
+        transform: translateY(-1px);
+      }
+    }
+  }
+
+  .mat-mdc-outlined-button {
+    border-radius: $border-radius !important;
+    border-color: $border-color !important;
+    color: $text-secondary !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+
+    &:hover {
+      background-color: $bg-secondary !important;
+      border-color: $text-muted !important;
+    }
+  }
+
+  .mat-mdc-icon-button {
+    border-radius: 0.5rem !important;
+
+    &:hover {
+      background-color: rgba($primary-color, 0.1) !important;
+    }
+  }
+
+  // Cards personalizados
+  .mat-mdc-card {
+    border-radius: $border-radius-lg !important;
+    box-shadow: $shadow-sm !important;
+    border: 1px solid $border-color !important;
+
+    &:hover {
+      box-shadow: $shadow-md !important;
+    }
+  }
+
+  // Tabla personalizada
+  .mat-mdc-table {
+    border-radius: $border-radius !important;
+    overflow: hidden;
+    box-shadow: none !important;
+
+    .mat-mdc-header-row {
+      background-color: $bg-secondary !important;
+
+      .mat-mdc-header-cell {
+        color: $text-secondary !important;
+        font-weight: 600 !important;
+        font-size: 0.75rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        border-bottom: 1px solid $border-color !important;
+      }
+    }
+
+    .mat-mdc-row {
+      transition: background-color 0.2s ease !important;
+      min-height: 100px !important;
+      border-bottom: 1px solid $border-color !important;
+
+      &:hover {
+        background-color: $bg-secondary !important;
+      }
+
+      .mat-mdc-cell {
+        color: $text-primary !important;
+        border-bottom: none !important;
+        padding: 18px 16px !important;
+      }
+    }
+  }
+
+  // Chips personalizados
+  .mat-mdc-chip-set {
+    .mat-mdc-chip {
+      border-radius: 9999px !important;
+      font-size: 0.75rem !important;
+      font-weight: 500 !important;
+
+      &.mat-mdc-chip-selected {
+        background-color: rgba($primary-color, 0.1) !important;
+        color: $primary-color !important;
+      }
+    }
+  }
+
+  // Select personalizado
+  .mat-mdc-select-panel {
+    border-radius: $border-radius !important;
+    box-shadow: $shadow-lg !important;
+    border: 1px solid $border-color !important;
+  }
+
+  // Spinner personalizado
+  .mat-mdc-progress-spinner {
+    circle {
+      stroke: $primary-color !important;
+    }
+  }
+
+  // Tooltips
+  .mat-mdc-tooltip {
+    background-color: $text-primary !important;
+    color: white !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+// Clases específicas del componente
+.docente-list-container {
+  // Animaciones suaves para transiciones
+  * {
+    transition: all 0.2s ease;
+  }
+}
+
+// Estados de cuenta con indicadores visuales mejorados
+.account-status-indicator {
+  &.active {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-radius: inherit;
+      z-index: -1;
+      opacity: 0.3;
+      filter: blur(4px);
+    }
+  }
+
+  &.inactive {
+    background-color: $bg-tertiary;
+    color: $text-muted;
+  }
+}
+
+// Avatar mejorado con gradientes
+.avatar-gradient {
+  background: linear-gradient(135deg,
+    rgba($primary-color, 0.1) 0%,
+    rgba($purple-color, 0.1) 100%);
+  border: 2px solid rgba($primary-color, 0.2);
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba($primary-color, 0.3);
+  }
+}
+
+// Badges con diseño mejorado
+.custom-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+
+  &.primary {
+    background: linear-gradient(135deg,
+      rgba($primary-color, 0.1) 0%,
+      rgba($purple-color, 0.1) 100%);
+    color: $primary-color;
+    border: 1px solid rgba($primary-color, 0.2);
+  }
+
+  &.success {
+    background-color: rgba($success-color, 0.1);
+    color: $success-color;
+    border: 1px solid rgba($success-color, 0.2);
+  }
+
+  &.muted {
+    background-color: $bg-tertiary;
+    color: $text-muted;
+    border: 1px solid $border-color;
+  }
+}
+
+// Botones de acción con estados hover mejorados
+.action-button {
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  border: none;
+  background: transparent;
+  color: $text-muted;
+  cursor: pointer;
+
+  &:hover {
+    &.view { color: $primary-color; background-color: rgba($primary-color, 0.1); }
+    &.schedule { color: $purple-color; background-color: rgba($purple-color, 0.1); }
+    &.credentials { color: $success-color; background-color: rgba($success-color, 0.1); }
+    &.edit { color: $primary-color; background-color: rgba($primary-color, 0.1); }
+    &.delete { color: $error-color; background-color: rgba($error-color, 0.1); }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Cards móviles con mejor espaciado y sombras
+.mobile-docente-card {
+  background: $bg-primary;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-lg;
+  padding: 1.5rem;
+  box-shadow: $shadow-sm;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+}
+
+// Mejoras para la tabla en desktop
+.desktop-table {
+  .header-gradient {
+    background: linear-gradient(135deg, $bg-secondary 0%, $bg-tertiary 100%);
+  }
+
+  .row-hover {
+    &:hover {
+      background: linear-gradient(135deg,
+        rgba($primary-color, 0.02) 0%,
+        rgba($purple-color, 0.02) 100%);
+    }
+  }
+}
+
+// Estados vacíos con mejor diseño
+.empty-state {
+  .empty-icon-container {
+    width: 4rem;
+    height: 4rem;
+    background: $bg-tertiary;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem auto;
+
+    mat-icon {
+      color: $text-muted;
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+}
+
+// Loading state mejorado
+.loading-state {
+  .loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 3rem;
+
+    .loading-text {
+      color: $text-secondary;
+      font-weight: 500;
+    }
+  }
+}
+
+// Responsive mejoras
+@media (max-width: 1024px) {
+  .mobile-responsive {
+    .filter-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .header-actions {
+      width: 100%;
+      justify-content: stretch;
+    }
+  }
+}
+
+// Animaciones sutiles
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+// Mejoras para los filtros
+.filters-container {
+  background: $bg-primary;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-lg;
+  padding: 1.5rem;
+  box-shadow: $shadow-sm;
+
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    align-items: end;
+  }
+}
+
+// Indicadores visuales mejorados para estados
+.status-indicator {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -0.75rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    transform: translateY(-50%);
+  }
+
+  &.active::before {
+    background-color: $success-color;
+    box-shadow: 0 0 0 2px rgba($success-color, 0.2);
+  }
+
+  &.inactive::before {
+    background-color: $text-muted;
+  }
+}

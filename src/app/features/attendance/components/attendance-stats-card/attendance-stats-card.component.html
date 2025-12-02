@@ -1,0 +1,196 @@
+<!-- src/app/features/attendance/components/attendance-stats-card/attendance-stats-card.component.html -->
+<div class="stats-container">
+
+  <!-- Selector de período -->
+  <mat-card class="period-selector-card">
+    <mat-card-content>
+      <mat-form-field appearance="outline" class="period-field">
+        <mat-label>Período</mat-label>
+        <mat-select [formControl]="periodControl">
+          <mat-option *ngFor="let period of periods" [value]="period.value">
+            {{ period.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando estadísticas...</p>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="stats-grid" *ngIf="!loading && stats">
+
+    <!-- Cumplimiento General -->
+    <mat-card class="stat-card compliance-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>verified</mat-icon>
+        <mat-card-title>Cumplimiento General</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="percentage-display">
+          <span class="percentage-value" [class]="getPenaltySeverity()">
+            {{ getCompliancePercentage() | number:'1.1-1' }}%
+          </span>
+        </div>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="getCompliancePercentage()"
+          [color]="getComplianceColor()">
+        </mat-progress-bar>
+        <p class="helper-text">
+          Basado en horas trabajadas vs programadas
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Total de Asistencias -->
+    <mat-card class="stat-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="icon-blue">event_available</mat-icon>
+        <mat-card-title>Total Asistencias</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="stat-value">{{ stats.attendanceCount }}</div>
+        <div class="stat-detail">
+          <span class="detail-item success">
+            <mat-icon>check</mat-icon>
+            {{ stats.onTimeCount }} a tiempo
+          </span>
+          <span class="detail-item warn">
+            <mat-icon>schedule</mat-icon>
+            {{ stats.lateCount }} tarde
+          </span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Puntualidad -->
+    <mat-card class="stat-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="icon-green">access_time</mat-icon>
+        <mat-card-title>Puntualidad</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="stat-value">{{ getOnTimePercentage() }}%</div>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="getOnTimePercentage()"
+          color="accent">
+        </mat-progress-bar>
+        <p class="helper-text">
+          {{ stats.onTimeCount }} de {{ stats.attendanceCount }} clases a tiempo
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Horas Trabajadas -->
+    <mat-card class="stat-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="icon-purple">schedule</mat-icon>
+        <mat-card-title>Horas Trabajadas</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="stat-value">
+          {{ timeUtils.minutesToReadableString(stats.totalMinutesWorked) }}
+        </div>
+        <div class="stat-detail">
+          <span class="detail-item">
+            Programadas: {{ timeUtils.minutesToReadableString(stats.totalMinutesScheduled) }}
+          </span>
+        </div>
+        <p class="helper-text">
+          Promedio: {{ getAverageHoursPerDay() }}h por día
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Penalizaciones -->
+    <mat-card class="stat-card penalty-card" [class]="getPenaltySeverity()">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="icon-orange">warning</mat-icon>
+        <mat-card-title>Penalizaciones</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="stat-value warn-value">
+          {{ timeUtils.minutesToReadableString(stats.totalPenaltyMinutes) }}
+        </div>
+        <div class="penalty-breakdown">
+          <div class="breakdown-item">
+            <mat-icon>login</mat-icon>
+            <span>Llegadas tarde:</span>
+            <strong>{{ stats.averageLateMinutes | number:'1.0-0' }} min promedio</strong>
+          </div>
+          <div class="breakdown-item">
+            <mat-icon>event</mat-icon>
+            <span>Total minutos perdidos:</span>
+            <strong>{{ stats.totalPenaltyMinutes }} min</strong>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Resumen Detallado -->
+    <mat-card class="stat-card summary-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="icon-teal">summarize</mat-icon>
+        <mat-card-title>Resumen Detallado</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <mat-icon>event</mat-icon>
+            <div class="summary-content">
+              <span class="label">Total de clases</span>
+              <span class="value">{{ stats.attendanceCount }}</span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <mat-icon>check_circle</mat-icon>
+            <div class="summary-content">
+              <span class="label">A tiempo</span>
+              <span class="value success">{{ stats.onTimeCount }}</span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <mat-icon>schedule</mat-icon>
+            <div class="summary-content">
+              <span class="label">Llegadas tarde</span>
+              <span class="value warn">{{ stats.lateCount }}</span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <mat-icon>timelapse</mat-icon>
+            <div class="summary-content">
+              <span class="label">Promedio de retraso</span>
+              <span class="value">{{ stats.averageLateMinutes | number:'1.1-1' }} min</span>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="summary-footer">
+          <p class="footer-text">
+            <mat-icon>info</mat-icon>
+            Las penalizaciones afectan directamente tu pago mensual
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+
+  <!-- Sin datos -->
+  <div class="empty-state" *ngIf="!loading && !stats">
+    <mat-icon>analytics</mat-icon>
+    <h3>No hay estadísticas disponibles</h3>
+    <p>No se encontraron registros de asistencia para el período seleccionado</p>
+  </div>
+</div>

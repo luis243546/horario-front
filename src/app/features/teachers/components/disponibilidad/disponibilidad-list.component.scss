@@ -1,0 +1,312 @@
+// src/app/features/docentes/components/disponibilidad/disponibilidad-list.component.scss
+
+// Variables
+$primary-color: #3f51b5;
+$accent-color: #ff4081;
+$warn-color: #f44336;
+$success-color: #4caf50;
+$background-color: #f5f7fa;
+$card-bg-color: #ffffff;
+$text-color: #333333;
+$light-text: #666666;
+$border-color: #e0e0e0;
+$shadow-color: rgba(0, 0, 0, 0.1);
+
+.disponibilidad-container {
+  .disponibilidad-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .header-info {
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 16px 0;
+        font-size: 20px;
+        color: $primary-color;
+        font-weight: 500;
+      }
+
+      .stats-summary {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+
+        .stat-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 12px 16px;
+          background-color: rgba($primary-color, 0.05);
+          border-radius: 8px;
+          min-width: 80px;
+
+          .stat-number {
+            font-size: 18px;
+            font-weight: 600;
+            color: $primary-color;
+            line-height: 1;
+          }
+
+          .stat-label {
+            font-size: 12px;
+            color: $light-text;
+            margin-top: 4px;
+            text-align: center;
+          }
+        }
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    gap: 16px;
+    color: $light-text;
+  }
+
+  .disponibilidad-content {
+    .days-detail-section {
+      margin-top: 32px;
+
+      .detail-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 20px 0;
+        font-size: 18px;
+        color: $text-color;
+        font-weight: 500;
+      }
+
+      .days-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 16px;
+
+        .day-card {
+          border-radius: 8px;
+          box-shadow: 0 2px 4px $shadow-color;
+          transition: all 0.3s ease;
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px $shadow-color;
+          }
+
+          &.empty-day {
+            border: 2px dashed $border-color;
+            background-color: rgba($light-text, 0.02);
+          }
+
+          ::ng-deep .mat-mdc-card-header {
+            padding-bottom: 8px;
+          }
+
+          .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+
+            .day-name {
+              margin: 0;
+              font-size: 16px;
+              font-weight: 600;
+              color: $primary-color;
+            }
+
+            .day-stats {
+              display: flex;
+              flex-direction: column;
+              align-items: flex-end;
+              gap: 2px;
+
+              .hours-count {
+                font-size: 14px;
+                font-weight: 600;
+                color: $success-color;
+              }
+
+              .blocks-count {
+                font-size: 12px;
+                color: $light-text;
+              }
+            }
+          }
+
+          .empty-day-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+
+            .empty-icon {
+              font-size: 48px;
+              height: 48px;
+              width: 48px;
+              color: $light-text;
+              margin-bottom: 12px;
+            }
+
+            p {
+              margin: 0 0 16px 0;
+              color: $light-text;
+            }
+          }
+
+          .availability-list {
+            .availability-item {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 12px 0;
+              border-bottom: 1px solid rgba($border-color, 0.5);
+
+              &:last-child {
+                border-bottom: none;
+              }
+
+              .time-info {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex: 1;
+
+                .time-icon {
+                  color: $primary-color;
+                  font-size: 18px;
+                  height: 18px;
+                  width: 18px;
+                }
+
+                .time-range {
+                  font-weight: 500;
+                  color: $text-color;
+                }
+
+                .duration {
+                  font-size: 12px;
+                  color: $light-text;
+                  background-color: rgba($success-color, 0.1);
+                  padding: 2px 6px;
+                  border-radius: 10px;
+                }
+              }
+
+              .item-actions {
+                display: flex;
+                gap: 4px;
+
+                button {
+                  ::ng-deep .mat-mdc-button-base {
+                    min-width: unset;
+                    width: 32px;
+                    height: 32px;
+                  }
+                }
+              }
+            }
+          }
+
+          .day-actions {
+            padding-top: 8px;
+            border-top: 1px solid $border-color;
+          }
+        }
+      }
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 64px 24px;
+      text-align: center;
+      background-color: $card-bg-color;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px $shadow-color;
+
+      .empty-state-icon {
+        font-size: 80px;
+        height: 80px;
+        width: 80px;
+        color: $light-text;
+        margin-bottom: 24px;
+      }
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 20px;
+        color: $text-color;
+      }
+
+      p {
+        margin: 0 0 24px 0;
+        color: $light-text;
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+// Estilos para el menú de acciones
+::ng-deep .warn-menu-item {
+  color: $warn-color !important;
+
+  .mat-icon {
+    color: $warn-color !important;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .disponibilidad-container {
+    .disponibilidad-header {
+      flex-direction: column;
+      align-items: stretch;
+
+      .header-info .stats-summary {
+        justify-content: center;
+      }
+
+      .header-actions {
+        justify-content: center;
+      }
+    }
+
+    .days-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .disponibilidad-container {
+    .disponibilidad-header .header-info .stats-summary {
+      gap: 12px;
+
+      .stat-item {
+        padding: 8px 12px;
+        min-width: 70px;
+      }
+    }
+  }
+}

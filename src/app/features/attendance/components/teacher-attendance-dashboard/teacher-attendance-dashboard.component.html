@@ -1,0 +1,208 @@
+<!-- src/app/features/attendance/components/teacher-attendance-dashboard/teacher-attendance-dashboard.component.html.backup -->
+<div class="attendance-dashboard">
+
+  <!-- Header con información del día -->
+  <mat-card class="header-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>how_to_reg</mat-icon>
+      <mat-card-title>Mi Asistencia</mat-card-title>
+      <mat-card-subtitle>{{ teacherName }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="date-time-display">
+        <div class="date">
+          <mat-icon>calendar_today</mat-icon>
+          <span>{{ currentDate }}</span>
+        </div>
+        <div class="time">
+          <mat-icon>access_time</mat-icon>
+          <span class="digital-clock">{{ currentTime }}</span>
+        </div>
+      </div>
+
+      <!-- Alerta de feriado -->
+      <div class="holiday-alert" *ngIf="isHoliday">
+        <mat-icon>beach_access</mat-icon>
+        <span>Hoy es día feriado: {{ holidayName }}</span>
+      </div>
+
+      <!-- Botón de refrescar -->
+      <button
+        mat-icon-button
+        class="refresh-button"
+        (click)="refreshData()"
+        matTooltip="Actualizar datos">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Tabs: Hoy | Historial | Estadísticas -->
+  <mat-tab-group class="main-tabs" animationDuration="300ms">
+
+    <!-- TAB 1: Clases de Hoy -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">today</mat-icon>
+        Hoy
+        <span class="badge" *ngIf="pendingAttendances.length > 0">
+          {{ pendingAttendances.length }}
+        </span>
+      </ng-template>
+
+      <div class="tab-content">
+        <!-- Loading -->
+        <div class="loading-container" *ngIf="loadingSessions">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Cargando clases del día...</p>
+        </div>
+
+        <!-- Sin clases -->
+        <div class="empty-state" *ngIf="!loadingSessions && todaySessions.length === 0">
+          <mat-icon>event_busy</mat-icon>
+          <h3>No tienes clases programadas hoy</h3>
+          <p>Disfruta tu día libre</p>
+        </div>
+
+        <!-- Lista de sesiones -->
+        <div class="sessions-list" *ngIf="!loadingSessions && todaySessions.length > 0">
+          <mat-card
+            *ngFor="let item of todaySessions"
+            class="session-card"
+            [class.completed]="item.status === 'completed'"
+            [class.pending]="item.status === 'pending'"
+            [class.late]="item.status === 'late'">
+
+            <mat-card-header>
+              <div mat-card-avatar class="session-avatar">
+                <mat-icon>{{ item.session.sessionType?.name === 'THEORY' ? 'menu_book' : 'science' }}</mat-icon>
+              </div>
+              <mat-card-title>{{ getSessionTitle(item.session) }}</mat-card-title>
+              <mat-card-subtitle>{{ getSessionSubtitle(item.session) }}</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="session-info">
+                <!-- Horario -->
+                <div class="info-item">
+                  <mat-icon>schedule</mat-icon>
+                  <span>{{ getSessionTime(item.session) }}</span>
+                </div>
+
+                <!-- Tipo de clase -->
+                <div class="info-item">
+                  <mat-icon>{{ item.session.sessionType?.name === 'THEORY' ? 'book' : 'biotech' }}</mat-icon>
+                  <span>{{ item.session.sessionType?.name === 'THEORY' ? 'Teoría' : 'Práctica' }}</span>
+                </div>
+
+                <!-- Estado -->
+                <div class="info-item">
+                  <mat-chip [color]="getStatusChipColor(item.status)" selected>
+                    {{ item.message }}
+                  </mat-chip>
+                </div>
+
+                <!-- Información de penalizaciones si existe -->
+                <div class="penalty-info" *ngIf="item.attendance">
+                  <div class="penalty-item" *ngIf="item.attendance.lateMinutes > 0">
+                    <mat-icon class="warn-icon">warning</mat-icon>
+                    <span>Llegada tarde: {{ item.attendance.lateMinutes }} min</span>
+                  </div>
+                  <div class="penalty-item" *ngIf="item.attendance.earlyDepartureMinutes > 0">
+                    <mat-icon class="warn-icon">exit_to_app</mat-icon>
+                    <span>Salida anticipada: {{ item.attendance.earlyDepartureMinutes }} min</span>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <!-- Botón Check-in -->
+              <button
+                mat-raised-button
+                color="primary"
+                *ngIf="item.canCheckIn"
+                (click)="checkIn(item)"
+                [disabled]="checkingIn === item.session.uuid || isHoliday">
+                <mat-spinner diameter="20" *ngIf="checkingIn === item.session.uuid"></mat-spinner>
+                <mat-icon *ngIf="checkingIn !== item.session.uuid">login</mat-icon>
+                {{ checkingIn === item.session.uuid ? 'Registrando...' : 'Marcar Entrada' }}
+              </button>
+
+              <!-- Botón Check-out -->
+              <button
+                mat-raised-button
+                color="accent"
+                *ngIf="item.canCheckOut"
+                (click)="checkOut(item)"
+                [disabled]="checkingOut === item.attendance?.uuid">
+                <mat-spinner diameter="20" *ngIf="checkingOut === item.attendance?.uuid"></mat-spinner>
+                <mat-icon *ngIf="checkingOut !== item.attendance?.uuid">logout</mat-icon>
+                {{ checkingOut === item.attendance?.uuid ? 'Registrando...' : 'Marcar Salida' }}
+              </button>
+
+              <!-- Estado completado -->
+              <div class="completed-badge" *ngIf="item.status === 'completed'">
+                <mat-icon>check_circle</mat-icon>
+                <span>Completado</span>
+              </div>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+
+        <!-- Resumen del día -->
+        <mat-card class="summary-card" *ngIf="todaySessions.length > 0">
+          <mat-card-content>
+            <h3><mat-icon>summarize</mat-icon> Resumen del Día</h3>
+            <div class="summary-grid">
+              <div class="summary-item">
+                <span class="label">Total de clases:</span>
+                <span class="value">{{ todaySessions.length }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">Completadas:</span>
+                <span class="value success">
+                  {{ getCompletedCount() }}
+                </span>
+              </div>
+              <div class="summary-item">
+                <span class="label">Pendientes:</span>
+                <span class="value warn">
+                  {{ getPendingCount() }}
+                </span>
+              </div>
+              <div class="summary-item">
+                <span class="label">Sin iniciar:</span>
+                <span class="value">
+                  {{ getNotStartedCount() }}
+                </span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- TAB 2: Historial -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">history</mat-icon>
+        Historial
+      </ng-template>
+      <div class="tab-content">
+        <app-attendance-history [teacherUuid]="teacherUuid"></app-attendance-history>
+      </div>
+    </mat-tab>
+
+    <!-- TAB 3: Estadísticas -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">analytics</mat-icon>
+        Estadísticas
+      </ng-template>
+      <div class="tab-content">
+        <app-attendance-stats-card [teacherUuid]="teacherUuid"></app-attendance-stats-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

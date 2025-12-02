@@ -1,0 +1,231 @@
+// src/app/features/docentes/components/disponibilidad/disponibilidad-form.component.scss
+
+// Variables
+$primary-color: #3f51b5;
+$accent-color: #ff4081;
+$warn-color: #f44336;
+$success-color: #4caf50;
+$info-color: #2196f3;
+$background-color: #f5f7fa;
+$text-color: #333333;
+$light-text: #666666;
+$border-color: #e0e0e0;
+
+.disponibilidad-form-container {
+  .dialog-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 20px;
+    color: $primary-color;
+
+    .teacher-name {
+      font-size: 14px;
+      color: $light-text;
+      font-weight: normal;
+      margin-left: 8px;
+    }
+  }
+
+  .dialog-content {
+    padding: 20px 24px;
+    min-width: 450px;
+    max-height: 70vh;
+    overflow-y: auto;
+
+    .availability-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      .full-width {
+        width: 100%;
+      }
+
+      .time-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+
+        .time-field {
+          input[type="time"] {
+            font-family: inherit;
+          }
+        }
+      }
+
+      .duration-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        background-color: rgba($success-color, 0.1);
+        border-radius: 8px;
+        color: $success-color;
+        font-weight: 500;
+
+        mat-icon {
+          color: $success-color;
+        }
+      }
+
+      .conflicts-section {
+        .conflicts-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 12px;
+          color: $warn-color;
+          font-weight: 500;
+        }
+
+        .conflicts-list {
+          margin-bottom: 16px;
+
+          .overlap-chip {
+            background-color: rgba($warn-color, 0.1);
+            color: $warn-color;
+
+            mat-icon {
+              color: $warn-color;
+            }
+          }
+
+          .adjacent-chip {
+            background-color: rgba($info-color, 0.1);
+            color: $info-color;
+
+            mat-icon {
+              color: $info-color;
+            }
+          }
+        }
+
+        .conflict-options {
+          padding: 16px;
+          background-color: rgba($warn-color, 0.05);
+          border-radius: 8px;
+          border-left: 4px solid $warn-color;
+
+          .conflict-warning {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0 0 0;
+            font-size: 14px;
+            color: $light-text;
+
+            mat-icon {
+              font-size: 16px;
+              height: 16px;
+              width: 16px;
+            }
+          }
+        }
+      }
+
+      .suggestions-section {
+        .suggestions-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 12px;
+          color: $primary-color;
+          font-weight: 500;
+        }
+
+        .suggestions-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          gap: 8px;
+
+          .suggestion-button {
+            padding: 12px 8px;
+            border: 1px solid rgba($primary-color, 0.3);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+
+            &:hover {
+              background-color: rgba($primary-color, 0.05);
+              border-color: $primary-color;
+            }
+
+            .suggestion-content {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 4px;
+
+              .suggestion-time {
+                font-weight: 500;
+                color: $text-color;
+                font-size: 13px;
+              }
+
+              .suggestion-duration {
+                font-size: 12px;
+                color: $light-text;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .dialog-actions {
+    padding: 16px 24px;
+    border-top: 1px solid $border-color;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    .button-spinner {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Estilos específicos para chips de conflictos
+::ng-deep .mat-mdc-chip {
+  &.overlap-chip {
+    --mdc-chip-container-color: rgba(244, 67, 54, 0.1);
+    --mdc-chip-label-text-color: #f44336;
+  }
+
+  &.adjacent-chip {
+    --mdc-chip-container-color: rgba(33, 150, 243, 0.1);
+    --mdc-chip-label-text-color: #2196f3;
+  }
+}
+
+// Responsive
+@media (max-width: 600px) {
+  .disponibilidad-form-container {
+    .dialog-content {
+      min-width: unset;
+      padding: 16px;
+
+      .availability-form {
+        .time-row {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+
+        .suggestions-section .suggestions-grid {
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        }
+      }
+    }
+
+    .dialog-actions {
+      padding: 12px 16px;
+      flex-direction: column-reverse;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+}

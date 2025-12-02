@@ -1,0 +1,604 @@
+// schedule-by-group.component.scss - Versión Mejorada
+
+// ===== VARIABLES MINIMALISTAS =====
+:root {
+  --schedule-primary: #3b82f6;
+  --schedule-secondary: #8b5cf6;
+  --schedule-border: #e2e8f0;
+  --schedule-bg: #f8fafc;
+  --row-height: 70px; // Altura fija para todas las filas
+}
+
+// ===== ANIMACIONES SUTILES =====
+@keyframes subtle-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gentle-scale {
+  from { transform: scale(0.98); }
+  to { transform: scale(1); }
+}
+
+// ===== EFECTOS MINIMALISTAS =====
+.animate-fade-in {
+  animation: subtle-fade 0.3s ease-out;
+}
+
+// ===== ESTRUCTURA DE FILAS UNIFORME =====
+.schedule-row {
+  height: var(--row-height);
+  min-height: var(--row-height);
+  max-height: var(--row-height);
+}
+
+// ===== TARJETAS DE SESIÓN MEJORADAS =====
+.session-card-theory {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  }
+
+  // Asegurar que el contenido no se desborde
+  .session-content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+}
+
+.session-card-practice {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+  }
+
+  // Asegurar que el contenido no se desborde
+  .session-content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+}
+
+// ===== BOTONES DE ACCIÓN INTERNOS =====
+.session-actions {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+
+  .action-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.5);
+      transform: scale(1.1);
+    }
+
+    &.delete-btn:hover {
+      background: rgba(239, 68, 68, 0.8);
+    }
+
+    mat-icon {
+      font-size: 12px;
+      width: 12px;
+      height: 12px;
+    }
+  }
+}
+
+// Mostrar botones al hacer hover en la celda
+.session-card-theory:hover .session-actions,
+.session-card-practice:hover .session-actions {
+  opacity: 1;
+}
+
+// ===== MEJORAS PARA ANGULAR MATERIAL =====
+::ng-deep {
+
+  // Tooltips personalizados para sesiones
+  .session-tooltip {
+    background: rgba(30, 41, 59, 0.95) !important;
+    color: white !important;
+    border-radius: 8px !important;
+    padding: 12px 16px !important;
+    font-size: 12px !important;
+    max-width: 280px !important;
+    line-height: 1.4 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+
+    // Evitar superposición con botones
+    .mat-tooltip {
+      white-space: pre-line !important;
+    }
+  }
+
+  // Form fields compactos
+  .compact-select {
+    .mat-mdc-text-field-wrapper {
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      height: 40px;
+
+      &:hover {
+        border-color: #cbd5e1;
+        background: #f1f5f9;
+      }
+    }
+
+    &.mat-focused .mat-mdc-text-field-wrapper {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .mat-mdc-form-field-label {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .mdc-notched-outline {
+      display: none;
+    }
+  }
+
+  // Panel de selección simple
+  .mat-mdc-select-panel {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  // Opciones simples
+  .mat-mdc-option {
+    border-radius: 4px;
+    margin: 2px 4px;
+    padding: 8px 12px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: #f1f5f9;
+    }
+
+    &.mat-mdc-option-active {
+      background: #eff6ff;
+      color: #1e40af;
+    }
+  }
+
+  // Botones simples
+  .mat-mdc-raised-button {
+    border-radius: 8px;
+    font-weight: 500;
+    text-transform: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  // Icon buttons simples
+  .mat-mdc-icon-button {
+    border-radius: 6px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(59, 130, 246, 0.1);
+      transform: scale(1.05);
+    }
+  }
+
+  // Tooltips simples
+  .mat-mdc-tooltip {
+    background: rgba(30, 41, 59, 0.9);
+    color: white;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    max-width: 250px;
+    line-height: 1.3;
+  }
+
+  // Snackbars simples
+  .mat-mdc-snack-bar-container {
+    border-radius: 8px;
+
+    &.success-snackbar {
+      background: #059669;
+    }
+
+    &.error-snackbar {
+      background: #dc2626;
+    }
+
+    &.warning-snackbar {
+      background: #d97706;
+    }
+
+    &.info-snackbar {
+      background: #2563eb;
+    }
+  }
+
+  // Progress spinner simple
+  .mat-mdc-progress-spinner {
+    svg circle {
+      stroke: #3b82f6;
+    }
+  }
+}
+
+// ===== RESPONSIVE COMPACTO =====
+@media (max-width: 1024px) {
+  .grid-cols-\[200px_repeat\(6\,1fr\)\] {
+    grid-template-columns: 180px repeat(6, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .min-w-\[1200px\] {
+    min-width: 1000px;
+  }
+
+  .grid-cols-\[200px_repeat\(6\,1fr\)\] {
+    grid-template-columns: 160px repeat(6, 1fr);
+  }
+
+  .session-card-theory,
+  .session-card-practice {
+    h6 {
+      font-size: 0.65rem;
+      line-height: 1.2;
+    }
+
+    .session-actions .action-btn {
+      width: 18px;
+      height: 18px;
+
+      mat-icon {
+        font-size: 11px;
+        width: 11px;
+        height: 11px;
+      }
+    }
+  }
+}
+
+// ===== UTILIDADES DE TEXTO =====
+.truncate-name {
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ===== ACCESIBILIDAD =====
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// Focus states simples
+button:focus-visible,
+.mat-mdc-option:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+// ===== SCROLLBAR SIMPLE =====
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+
+    &:hover {
+      background: #94a3b8;
+    }
+  }
+}
+
+// ===== EFECTOS DE TRANSICIÓN SIMPLES =====
+.transition-all {
+  transition: all 0.2s ease;
+}
+
+.transition-colors {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.transition-transform {
+  transition: transform 0.2s ease;
+}
+
+.transition-opacity {
+  transition: opacity 0.2s ease;
+}
+
+// ===== ALTURA FIJA PARA FILAS =====
+.h-16 {
+  height: 70px !important;
+  min-height: 70px !important;
+  max-height: 70px !important;
+}
+
+// ===== ASEGURAR QUE LOS ICONOS NO SE DESBORDEN =====
+.session-card-theory,
+.session-card-practice {
+  .text-xs mat-icon {
+    font-size: 12px !important;
+    width: 12px !important;
+    height: 12px !important;
+    line-height: 12px !important;
+  }
+}
+
+// ===== CELDA DE HORA CON TOOLTIP =====
+.time-cell {
+  cursor: help;
+
+  &:hover {
+    background: rgba(59, 130, 246, 0.05);
+  }
+}
+// ===== ESTILOS PARA FILTROS COMPACTOS =====
+
+// Formularios compactos
+.compact-field {
+  ::ng-deep {
+    .mat-mdc-form-field-wrapper {
+      padding-bottom: 0.5rem;
+    }
+
+    .mat-mdc-form-field-flex {
+      min-height: 40px;
+      padding: 4px 8px;
+    }
+
+    .mat-mdc-form-field-infix {
+      min-height: 32px;
+      padding: 6px 0;
+    }
+
+    .mat-mdc-form-field-label {
+      top: 18px;
+      font-size: 0.875rem;
+    }
+
+    .mat-mdc-form-field-label.mdc-floating-label--float-above {
+      transform: translateY(-20px) scale(0.75);
+    }
+
+    .mat-mdc-select-value {
+      font-size: 0.875rem;
+    }
+
+    .mat-mdc-input-element {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+// Selector principal más compacto
+.compact-select {
+  ::ng-deep {
+    .mat-mdc-form-field-wrapper {
+      padding-bottom: 0.75rem;
+    }
+
+    .mat-mdc-form-field-flex {
+      min-height: 48px;
+    }
+
+    .mat-mdc-form-field-infix {
+      min-height: 40px;
+      padding: 8px 0;
+    }
+  }
+}
+
+// Animaciones suaves para el panel
+@keyframes slide-in-from-top-3 {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation-fill-mode: forwards;
+}
+
+.slide-in-from-top-3 {
+  animation-name: slide-in-from-top-3;
+}
+
+.duration-300 {
+  animation-duration: 300ms;
+}
+
+// Overlay para cerrar filtros
+.filters-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  z-index: 40;
+  backdrop-filter: blur(1px);
+}
+
+// Mejorar el botón de filtros
+.filters-button {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &.active {
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+  }
+}
+
+// Badges de filtros activos
+.filter-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+// Responsive para pantallas pequeñas
+@media (max-width: 768px) {
+  .filters-panel {
+    width: calc(100vw - 2rem) !important;
+    max-width: 400px;
+    right: 1rem !important;
+    left: 1rem !important;
+  }
+}
+// ✅ ESTILOS para selección múltiple
+.cell-selected {
+  border: 2px solid #3b82f6 !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.cell-selecting {
+  transition: all 0.2s ease;
+}
+
+.multi-selection-panel {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+// ✅ MEJORAR indicador visual para celdas disponibles
+.available-cell {
+  &:hover {
+    .add-icon {
+      transform: scale(1.1);
+    }
+  }
+
+  &.selected {
+    .selection-indicator {
+      animation: checkmark 0.3s ease-out;
+    }
+  }
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// ✅ ESTILOS para el tip de instrucciones
+.instruction-tip {
+  kbd {
+    font-family: monospace;
+    font-size: 0.75rem;
+    padding: 2px 4px;
+    border-radius: 3px;
+    border: 1px solid #d1d5db;
+    background: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+}

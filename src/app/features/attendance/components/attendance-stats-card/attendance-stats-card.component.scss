@@ -1,0 +1,351 @@
+// src/app/features/attendance/components/attendance-stats-card/attendance-stats-card.component.scss
+
+.stats-container {
+
+  // ==================== SELECTOR DE PERÍODO ====================
+  .period-selector-card {
+    margin-bottom: 24px;
+
+    mat-card-content {
+      padding: 16px;
+    }
+
+    .period-field {
+      width: 100%;
+      max-width: 300px;
+    }
+  }
+
+  // ==================== LOADING ====================
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+
+    mat-spinner {
+      margin-bottom: 16px;
+    }
+
+    p {
+      color: #757575;
+      margin: 0;
+    }
+  }
+
+  // ==================== GRID DE ESTADÍSTICAS ====================
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+
+    .stat-card {
+      transition: all 0.3s ease;
+
+      &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+      }
+
+      mat-card-header {
+        mat-icon[mat-card-avatar] {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          font-size: 28px;
+          width: 48px;
+          height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+
+          &.icon-blue {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+          }
+
+          &.icon-green {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+          }
+
+          &.icon-purple {
+            background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+          }
+
+          &.icon-orange {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+          }
+
+          &.icon-teal {
+            background: linear-gradient(135deg, #009688 0%, #00796b 100%);
+          }
+        }
+
+        mat-card-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: #424242;
+        }
+      }
+
+      mat-card-content {
+        padding: 20px;
+      }
+
+      // Valor principal
+      .stat-value {
+        font-size: 36px;
+        font-weight: 700;
+        color: #424242;
+        margin: 12px 0;
+        text-align: center;
+
+        &.warn-value {
+          color: #f57c00;
+        }
+      }
+
+      // Detalles
+      .stat-detail {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 12px;
+
+        .detail-item {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 13px;
+
+          mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+          }
+
+          &.success {
+            color: #4caf50;
+          }
+
+          &.warn {
+            color: #ff9800;
+          }
+        }
+      }
+
+      // Texto de ayuda
+      .helper-text {
+        text-align: center;
+        color: #757575;
+        font-size: 13px;
+        margin: 12px 0 0 0;
+      }
+
+      // Progress bars
+      mat-progress-bar {
+        margin: 12px 0;
+        height: 8px;
+        border-radius: 4px;
+      }
+    }
+
+    // ==================== CARD DE CUMPLIMIENTO ====================
+    .compliance-card {
+      .percentage-display {
+        text-align: center;
+        margin: 20px 0;
+
+        .percentage-value {
+          font-size: 48px;
+          font-weight: 900;
+
+          &.success {
+            color: #4caf50;
+          }
+
+          &.warn {
+            color: #ff9800;
+          }
+
+          &.danger {
+            color: #f44336;
+          }
+        }
+      }
+    }
+
+    // ==================== CARD DE PENALIZACIONES ====================
+    .penalty-card {
+      &.success {
+        background: linear-gradient(to bottom right, #f1f8e9, white);
+        border-left: 4px solid #4caf50;
+      }
+
+      &.warn {
+        background: linear-gradient(to bottom right, #fff3e0, white);
+        border-left: 4px solid #ff9800;
+      }
+
+      &.danger {
+        background: linear-gradient(to bottom right, #ffebee, white);
+        border-left: 4px solid #f44336;
+      }
+
+      .penalty-breakdown {
+        margin-top: 16px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.03);
+        border-radius: 8px;
+
+        .breakdown-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 8px;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          mat-icon {
+            color: #757575;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+
+          span {
+            color: #616161;
+            font-size: 13px;
+          }
+
+          strong {
+            margin-left: auto;
+            color: #424242;
+            font-size: 14px;
+          }
+        }
+      }
+    }
+
+    // ==================== CARD DE RESUMEN ====================
+    .summary-card {
+      grid-column: 1 / -1; // Ocupa todo el ancho
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+
+        .summary-item {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          padding: 12px;
+          background: #f5f5f5;
+          border-radius: 8px;
+
+          mat-icon {
+            color: #667eea;
+            font-size: 32px;
+            width: 32px;
+            height: 32px;
+          }
+
+          .summary-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            .label {
+              font-size: 12px;
+              color: #757575;
+            }
+
+            .value {
+              font-size: 20px;
+              font-weight: 700;
+              color: #424242;
+
+              &.success {
+                color: #4caf50;
+              }
+
+              &.warn {
+                color: #ff9800;
+              }
+            }
+          }
+        }
+      }
+
+      mat-divider {
+        margin: 20px 0;
+      }
+
+      .summary-footer {
+        .footer-text {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #616161;
+          font-size: 14px;
+          margin: 0;
+
+          mat-icon {
+            color: #2196f3;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+        }
+      }
+    }
+  }
+
+  // ==================== ESTADO VACÍO ====================
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: #bdbdbd;
+      margin-bottom: 16px;
+    }
+
+    h3 {
+      margin: 8px 0;
+      color: #424242;
+      font-weight: 500;
+    }
+
+    p {
+      color: #757575;
+      margin: 0;
+    }
+  }
+}
+
+// ==================== RESPONSIVE ====================
+@media (max-width: 768px) {
+  .stats-container {
+    .stats-grid {
+      grid-template-columns: 1fr;
+
+      .summary-card {
+        .summary-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    }
+  }
+}

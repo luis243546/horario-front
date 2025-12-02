@@ -1,0 +1,742 @@
+<!-- schedule-by-group.component.html - Con Header de Metadatos -->
+<div class="min-h-screen bg-slate-50 p-4">
+  <div class="max-w-[1600px] mx-auto space-y-4">
+
+    <!-- Compact Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <button
+            mat-icon-button
+            (click)="goBack()"
+            class="w-10 h-10 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors">
+            <mat-icon class="text-slate-600">arrow_back</mat-icon>
+          </button>
+          <div>
+            <h1 class="text-xl font-semibold text-slate-900">Horario por Grupo</h1>
+            <p class="text-sm text-slate-500">Gestión visual de horarios académicos</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <!-- Compact Group Info -->
+          <div *ngIf="selectedGroup" class="flex items-center space-x-4 text-sm">
+            <div class="flex items-center space-x-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                <mat-icon class="text-blue-600 text-sm">groups</mat-icon>
+              </div>
+              <div>
+                <span class="font-medium text-slate-900">{{ selectedGroup.name }}</span>
+                <span class="text-slate-500 ml-1">• Ciclo {{ selectedGroup.cycleNumber }}</span>
+              </div>
+            </div>
+            <div class="text-slate-400">|</div>
+            <div class="flex items-center space-x-2">
+              <mat-icon class="text-slate-400 text-sm">schedule</mat-icon>
+              <span class="text-slate-600">{{ getTotalHours() }} horas</span>
+            </div>
+          </div>
+
+          <!-- ✅ NUEVO: Selector de Grupo Compacto con Overlay -->
+          <div class="relative">
+            <div class="flex items-center space-x-3">
+              <!-- Selector Principal -->
+              <div class="w-80">
+                <mat-form-field appearance="outline" class="compact-select w-full">
+                  <mat-label>
+                    <div class="flex items-center space-x-2">
+                      <mat-icon class="text-sm">groups</mat-icon>
+                      <span>Seleccionar Grupo</span>
+                      <span *ngIf="getActiveFiltersCount() > 0"
+                            class="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full ml-1">
+                        {{ getActiveFiltersCount() }}
+                      </span>
+                    </div>
+                  </mat-label>
+                  <mat-select [formControl]="groupControl" placeholder="Buscar grupo...">
+                    <mat-option *ngFor="let group of filteredGroups" [value]="group.uuid">
+                      <div class="flex items-center justify-between w-full py-1">
+                        <div class="flex flex-col">
+                          <span class="font-medium text-sm">{{ group.name }}</span>
+                          <span class="text-xs text-slate-500">
+                            {{ group.careerName }} • Ciclo {{ group.cycleNumber }}
+                          </span>
+                        </div>
+                      </div>
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <!-- Botón de Filtros Elegante -->
+              <button
+                mat-button
+                (click)="toggleFilters()"
+                class="h-12 px-4 rounded-lg border-2 transition-all duration-200 flex items-center space-x-2 relative"
+                [class.border-blue-500]="filtersExpanded"
+                [class.bg-blue-50]="filtersExpanded"
+                [class.text-blue-700]="filtersExpanded"
+                [class.border-slate-300]="!filtersExpanded"
+                [class.hover:border-slate-400]="!filtersExpanded"
+                [class.hover:bg-slate-50]="!filtersExpanded"
+                matTooltip="Filtros avanzados"
+                matTooltipPosition="below">
+
+                <mat-icon
+                  class="transition-transform duration-200"
+                  [class.rotate-180]="filtersExpanded">
+                  tune
+                </mat-icon>
+                <span class="font-medium text-sm">Filtros</span>
+
+                <!-- Badge de filtros activos -->
+                <div *ngIf="getActiveFiltersCount() > 0 && !filtersExpanded"
+                     class="absolute -top-2 -right-2 w-5 h-5 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                  {{ getActiveFiltersCount() }}
+                </div>
+              </button>
+            </div>
+
+            <!-- ✅ NUEVO: Panel de Filtros Flotante Elegante -->
+            <!-- ✅ OPTIMIZADO: Panel de Filtros Flotante Compacto -->
+            <div *ngIf="filtersExpanded"
+                 class="absolute top-full right-0 mt-2 w-[500px] bg-white rounded-xl shadow-2xl border border-slate-200 z-50
+            animate-in slide-in-from-top-3 duration-300 max-h-[80vh] overflow-y-auto"
+                 (clickOutside)="closeFilters()">
+
+              <!-- Header del Panel - Más Compacto -->
+              <div class="sticky top-0 bg-white border-b border-slate-100 p-4 rounded-t-xl">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                      <mat-icon class="text-white text-sm">filter_alt</mat-icon>
+                    </div>
+                    <div>
+                      <h3 class="font-semibold text-slate-900">Filtros Avanzados</h3>
+                      <p class="text-xs text-slate-500">{{ filteredGroups.length }} resultado(s)</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center space-x-2">
+                    <!-- Limpiar filtros -->
+                    <button
+                      mat-button
+                      (click)="clearAllFilters()"
+                      [disabled]="getActiveFiltersCount() === 0"
+                      class="text-xs text-red-600 hover:bg-red-50 px-2 py-1 rounded-lg transition-colors
+                 disabled:text-slate-400 disabled:hover:bg-transparent">
+                      <mat-icon class="mr-1 text-sm">clear_all</mat-icon>
+                      Limpiar
+                    </button>
+
+                    <!-- Cerrar -->
+                    <button
+                      mat-icon-button
+                      (click)="closeFilters()"
+                      class="w-7 h-7 hover:bg-slate-100 rounded-lg transition-colors">
+                      <mat-icon class="text-slate-400 text-sm">close</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contenido del Panel - Más Compacto -->
+              <div class="p-4 space-y-4">
+
+                <!-- Grid de Filtros - Ahora en 1 columna para mayor compacidad -->
+                <div class="space-y-3">
+
+                  <!-- Filtro por Modalidad -->
+                  <div class="space-y-1">
+                    <label class="flex items-center space-x-2 text-xs font-medium text-slate-700">
+                      <mat-icon class="text-blue-600 text-sm">school</mat-icon>
+                      <span>Modalidad Educativa</span>
+                    </label>
+                    <mat-form-field appearance="outline" class="w-full compact-field">
+                      <mat-select [formControl]="modalityFilter" placeholder="Seleccionar modalidad">
+                        <mat-option value="">
+                          <div class="flex items-center space-x-2 py-1">
+                            <mat-icon class="text-slate-400 text-sm">all_inclusive</mat-icon>
+                            <span class="text-sm">Todas las modalidades</span>
+                          </div>
+                        </mat-option>
+                        <mat-option *ngFor="let modality of modalitiesOptions" [value]="modality.uuid">
+                          <div class="flex items-center space-x-2 py-1">
+                            <mat-icon class="text-blue-600 text-sm">{{ modality.durationYears <= 3 ? 'business' : 'account_balance' }}</mat-icon>
+                            <div class="flex flex-col">
+                              <span class="font-medium text-sm">{{ modality.name }}</span>
+                              <span class="text-xs text-slate-500">{{ modality.durationYears }} años</span>
+                            </div>
+                          </div>
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
+                  <!-- Filtro por Carrera -->
+                  <div class="space-y-1">
+                    <label class="flex items-center space-x-2 text-xs font-medium text-slate-700">
+                      <mat-icon class="text-green-600 text-sm">work</mat-icon>
+                      <span>Carrera Profesional</span>
+                    </label>
+                    <mat-form-field appearance="outline" class="w-full compact-field">
+                      <mat-select [formControl]="careerFilter"
+                                  [disabled]="!modalityFilter.value"
+                                  placeholder="Seleccionar carrera">
+                        <mat-option value="">
+                          <div class="flex items-center space-x-2 py-1">
+                            <mat-icon class="text-slate-400 text-sm">all_inclusive</mat-icon>
+                            <span class="text-sm">Todas las carreras</span>
+                          </div>
+                        </mat-option>
+                        <mat-option *ngFor="let career of careersOptions" [value]="career.uuid">
+                          <div class="flex items-center space-x-2 py-1">
+                            <mat-icon class="text-green-600 text-sm">badge</mat-icon>
+                            <div class="flex flex-col">
+                              <span class="font-medium text-sm">{{ career.name }}</span>
+                              <span class="text-xs text-slate-500">{{ career.cycles?.length || 0 }} ciclos</span>
+                            </div>
+                          </div>
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
+                  <!-- Filtro por Ciclo -->
+                  <div class="space-y-1">
+                    <label class="flex items-center space-x-2 text-xs font-medium text-slate-700">
+                      <mat-icon class="text-purple-600 text-sm">layers</mat-icon>
+                      <span>Ciclo Académico</span>
+                    </label>
+                    <mat-form-field appearance="outline" class="w-full compact-field">
+                      <mat-select [formControl]="cycleFilter"
+                                  [disabled]="!careerFilter.value"
+                                  placeholder="Seleccionar ciclo">
+                        <mat-option value="">
+                          <div class="flex items-center space-x-2 py-1">
+                            <mat-icon class="text-slate-400 text-sm">all_inclusive</mat-icon>
+                            <span class="text-sm">Todos los ciclos</span>
+                          </div>
+                        </mat-option>
+                        <mat-option *ngFor="let cycle of cyclesOptions" [value]="cycle">
+                          <div class="flex items-center space-x-2 py-1">
+                            <div class="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center">
+                              <span class="text-xs font-bold text-purple-600">{{ cycle }}</span>
+                            </div>
+                            <span class="font-medium text-sm">Ciclo {{ cycle }}</span>
+                          </div>
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
+                  <!-- Búsqueda por Texto -->
+                  <div class="space-y-1">
+                    <label class="flex items-center space-x-2 text-xs font-medium text-slate-700">
+                      <mat-icon class="text-orange-600 text-sm">search</mat-icon>
+                      <span>Búsqueda por Texto</span>
+                    </label>
+                    <mat-form-field appearance="outline" class="w-full compact-field">
+                      <input matInput
+                             [formControl]="searchFilter"
+                             placeholder="Nombre del grupo...">
+                      <mat-icon matSuffix class="text-slate-400 text-sm">search</mat-icon>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <!-- Estado de Filtros Activos - Más Compacto -->
+                <div *ngIf="getActiveFiltersCount() > 0"
+                     class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div class="flex items-start space-x-2">
+                    <mat-icon class="text-blue-600 text-sm mt-0.5">info</mat-icon>
+                    <div class="flex-1">
+                      <h4 class="font-medium text-blue-900 text-xs">Filtros Aplicados</h4>
+                      <div class="mt-1 flex flex-wrap gap-1">
+            <span *ngIf="modalityFilter.value"
+                  class="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
+              <mat-icon class="mr-1 text-xs">school</mat-icon>
+              {{ getModalityName(modalityFilter.value) }}
+              <button (click)="modalityFilter.setValue('')"
+                      class="ml-1 hover:bg-blue-200 rounded-full p-0.5">
+                <mat-icon class="text-xs">close</mat-icon>
+              </button>
+            </span>
+
+                        <span *ngIf="careerFilter.value"
+                              class="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
+              <mat-icon class="mr-1 text-xs">work</mat-icon>
+                          {{ getCareerName(careerFilter.value) }}
+                          <button (click)="careerFilter.setValue('')"
+                                  class="ml-1 hover:bg-green-200 rounded-full p-0.5">
+                <mat-icon class="text-xs">close</mat-icon>
+              </button>
+            </span>
+
+                        <span *ngIf="cycleFilter.value"
+                              class="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-800 text-xs rounded-full">
+              <mat-icon class="mr-1 text-xs">layers</mat-icon>
+              Ciclo {{ cycleFilter.value }}
+                          <button (click)="cycleFilter.setValue('')"
+                                  class="ml-1 hover:bg-purple-200 rounded-full p-0.5">
+                <mat-icon class="text-xs">close</mat-icon>
+              </button>
+            </span>
+
+                        <span *ngIf="searchFilter.value"
+                              class="inline-flex items-center px-2 py-0.5 bg-orange-100 text-orange-800 text-xs rounded-full">
+              <mat-icon class="mr-1 text-xs">search</mat-icon>
+              "{{ searchFilter.value }}"
+              <button (click)="searchFilter.setValue('')"
+                      class="ml-1 hover:bg-orange-200 rounded-full p-0.5">
+                <mat-icon class="text-xs">close</mat-icon>
+              </button>
+            </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Estadísticas Compactas -->
+                <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                      <mat-icon class="text-slate-600 text-sm">analytics</mat-icon>
+                      <span class="font-medium text-slate-700 text-sm">Resultados</span>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-lg font-bold text-slate-900">{{ filteredGroups.length }}</div>
+                      <div class="text-xs text-slate-500">de {{ studentGroups.length }} grupos</div>
+                    </div>
+                  </div>
+
+                  <!-- Barra de progreso más pequeña -->
+                  <div class="mt-2 bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-full rounded-full transition-all duration-500"
+                         [style.width.%]="(filteredGroups.length / Math.max(studentGroups.length, 1)) * 100">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Compact Action Button -->
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="!selectedGroup"
+            (click)="openAssignmentDialog()"
+            class="h-12 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
+            <mat-icon class="mr-2 text-sm">add</mat-icon>
+            <span class="text-sm font-medium">Nueva Clase</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ NUEVO: Header Sticky con Metadatos de Cursos -->
+    <app-course-metadata-header
+      *ngIf="selectedGroup && !loading && !loadingCourses"
+      [selectedGroup]="selectedGroup"
+      [sessions]="sessions"
+      [isSticky]="true">
+    </app-course-metadata-header>
+
+
+    <!-- Loading State para Metadatos -->
+    <div *ngIf="selectedGroup && (loading || loadingCourses)"
+         class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <div class="flex items-center justify-center space-x-3">
+        <mat-spinner diameter="24"></mat-spinner>
+        <span class="text-slate-600">
+          {{ loadingCourses ? 'Cargando información de cursos...' : 'Cargando horario...' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Compact Schedule Board -->
+    <div *ngIf="selectedGroup && !loading && !loadingCourses"
+         class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+
+      <!-- Board Header con Controles de Colapso -->
+      <div class="bg-slate-900 text-white p-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <h3 class="font-semibold">Tablero de Horarios</h3>
+            <span class="text-slate-300 text-sm">{{ selectedGroup?.name }}</span>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <!-- Controles de Colapso -->
+            <div *ngIf="showCollapseControls" class="flex items-center space-x-2 text-xs">
+              <button
+                mat-icon-button
+                (click)="expandAllTimeSlots()"
+                class="w-7 h-7 rounded bg-white/20 hover:bg-white/30 transition-colors"
+                matTooltip="Expandir todos los turnos"
+                matTooltipPosition="below">
+                <mat-icon class="text-white text-sm">expand_more</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                (click)="collapseEmptyTimeSlots()"
+                class="w-7 h-7 rounded bg-white/20 hover:bg-white/30 transition-colors"
+                matTooltip="Colapsar turnos vacíos"
+                matTooltipPosition="below">
+                <mat-icon class="text-white text-sm">expand_less</mat-icon>
+              </button>
+            </div>
+
+            <!-- Compact Legend -->
+            <div class="flex items-center space-x-4 text-xs">
+              <div class="flex items-center space-x-1">
+                <div class="w-3 h-3 rounded bg-blue-500"></div>
+                <span>Teórica</span>
+              </div>
+              <div class="flex items-center space-x-1">
+                <div class="w-3 h-3 rounded bg-purple-500"></div>
+                <span>Práctica</span>
+              </div>
+              <div class="flex items-center space-x-1">
+                <div class="w-3 h-3 rounded border border-emerald-400 border-dashed"></div>
+                <span>Disponible</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compact Schedule Grid -->
+      <div class="overflow-x-auto">
+        <div class="min-w-[1200px]">
+
+          <!-- Compact Header Row -->
+          <div class="grid grid-cols-[200px_repeat(6,1fr)] bg-slate-50 border-b border-slate-200">
+            <!-- Time Header -->
+            <div class="p-3 bg-white border-r border-slate-200 sticky left-0 z-20">
+              <div class="flex items-center space-x-2">
+                <mat-icon class="text-slate-500 text-lg">schedule</mat-icon>
+                <div>
+                  <h4 class="font-medium text-slate-800">Hora</h4>
+                  <p class="text-xs text-slate-500">Horario • Duración</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Compact Day Headers -->
+            <div *ngFor="let day of workingDays" class="p-3 text-center">
+              <div class="flex flex-col items-center space-y-1">
+                <mat-icon class="text-slate-600">{{ getDayIcon(day) }}</mat-icon>
+                <span class="font-medium text-slate-800 text-sm">{{ getDayName(day) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Schedule Content agrupado por TimeSlot (ordenado cronológicamente) -->
+          <div>
+            <ng-container *ngFor="let timeSlot of getSortedTimeSlots(); let timeSlotIndex = index">
+
+              <!-- Encabezado del TimeSlot (Turno) -->
+              <div class="grid grid-cols-[200px_repeat(6,1fr)] bg-slate-100 border-b border-slate-200 hover:bg-slate-150 transition-colors">
+                <!-- TimeSlot Header Cell -->
+                <div class="p-2 bg-slate-200 border-r border-slate-300 sticky left-0 z-15">
+                  <button
+                    class="w-full flex items-center justify-between text-left hover:bg-slate-300 rounded p-1 transition-colors"
+                    (click)="toggleTimeSlotCollapse(timeSlot.uuid)">
+
+                    <div class="flex items-center space-x-2">
+                      <!-- Ícono de colapso -->
+                      <mat-icon class="text-slate-600 text-lg transition-transform duration-200"
+                                [class.rotate-90]="!isTimeSlotCollapsed(timeSlot.uuid)">
+                        chevron_right
+                      </mat-icon>
+
+                      <!-- Info del turno -->
+                      <div>
+                        <div class="font-medium text-slate-800 text-sm">
+                          {{ timeSlot.name }}
+                        </div>
+                        <div class="text-xs text-slate-600">
+                          {{ timeSlot.startTime }} - {{ timeSlot.endTime }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Resumen cuando está colapsado -->
+                    <div *ngIf="isTimeSlotCollapsed(timeSlot.uuid)"
+                         class="text-xs text-slate-600 bg-slate-300 px-2 py-1 rounded">
+                      {{ getCollapsedTimeSlotSummary(timeSlot.uuid) }}
+                    </div>
+                  </button>
+                </div>
+
+                <!-- TimeSlot Summary Cells (cuando está colapsado) -->
+                <div *ngFor="let day of workingDays"
+                     class="p-2 border-r border-slate-300 last:border-r-0 flex items-center justify-center">
+                  <div *ngIf="isTimeSlotCollapsed(timeSlot.uuid)"
+                       class="text-xs text-slate-500">
+                    <!-- Aquí podrías mostrar un resumen por día si lo deseas -->
+                    <mat-icon class="text-slate-400">more_horiz</mat-icon>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Filas de Horas del TimeSlot (solo si no está colapsado) -->
+              <ng-container *ngIf="!isTimeSlotCollapsed(timeSlot.uuid)">
+                <div *ngFor="let row of scheduleHourRows; let rowIndex = index">
+                  <div *ngIf="row.timeSlot.uuid === timeSlot.uuid"
+                       class="grid grid-cols-[200px_repeat(6,1fr)] hover:bg-slate-50/50 transition-colors border-b border-slate-100 last:border-b-0 h-16">
+
+                    <!-- Compact Time Cell with Tooltip -->
+                    <div class="p-2 bg-white border-r border-slate-100 sticky left-0 z-10 flex items-center">
+                      <div
+                        class="flex items-center space-x-3 w-full cursor-help"
+                        [matTooltip]="getTimeSlotTooltip(row)"
+                        matTooltipPosition="right">
+
+                        <!-- Hour Number Badge -->
+                        <div class="w-7 h-7 rounded-lg bg-slate-700 flex items-center justify-center flex-shrink-0">
+                          <span class="text-white font-semibold text-xs">{{ row.teachingHour.orderInTimeSlot }}</span>
+                        </div>
+
+                        <!-- Time Info -->
+                        <div class="flex-1 min-w-0">
+                          <div class="font-medium text-slate-800 text-sm truncate">
+                            {{ formatTime(row.teachingHour.startTime) }} - {{ formatTime(row.teachingHour.endTime) }}
+                          </div>
+                          <div class="text-xs text-slate-500">
+                            {{ row.teachingHour.durationMinutes }} min
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Compact Day Cells -->
+                    <div *ngFor="let day of workingDays" class="relative border-r border-slate-100 last:border-r-0">
+                          <ng-container *ngIf="getCellForDay(row, day) as cell">
+
+                            <!-- Session Card (sin cambios) -->
+                            <div *ngIf="cell.session"
+                                 class="absolute inset-1 rounded-lg shadow-sm cursor-pointer group transition-all duration-200 hover:shadow-md overflow-hidden"
+                                 [class]="getSessionCardClasses(cell.session)"
+                                 (click)="editSession(cell.session)"
+                                 [matTooltip]="getCellTooltip(cell)"
+                                 matTooltipClass="session-tooltip"
+                                 matTooltipPosition="above">
+                              <!-- Contenido de sesión existente sin cambios -->
+                              <div class="p-2 h-full flex flex-col justify-between relative">
+                                <div class="flex-1 min-h-0">
+                                  <h6 class="font-medium text-white text-xs leading-tight mb-1 truncate">
+                                    {{ cell.session.course.name }}
+                                  </h6>
+                                  <div class="text-xs text-white/80 space-y-0.5">
+                                    <div class="flex items-center space-x-1">
+                                      <mat-icon class="text-xs flex-shrink-0">person</mat-icon>
+                                      <span class="truncate">{{ getShortName(cell.session.teacher.fullName) }}</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                      <mat-icon class="text-xs flex-shrink-0">room</mat-icon>
+                                      <span class="truncate">{{ cell.session.learningSpace.name }}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="absolute top-1 right-1 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                  <button
+                                    mat-icon-button
+                                    class="w-5 h-5 bg-black/30 hover:bg-black/50 rounded flex items-center justify-center"
+                                    (click)="editSession(cell.session); $event.stopPropagation()"
+                                    matTooltip="Editar clase">
+                                    <mat-icon class="text-white text-xs">edit</mat-icon>
+                                  </button>
+                                  <button
+                                    mat-icon-button
+                                    class="w-5 h-5 bg-black/30 hover:bg-red-600/80 rounded flex items-center justify-center"
+                                    (click)="deleteSession(cell.session); $event.stopPropagation()"
+                                    matTooltip="Eliminar clase">
+                                    <mat-icon class="text-white text-xs">delete</mat-icon>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- ✅ NUEVA: Available Cell con soporte de selección múltiple -->
+                            <!-- ✅ CORREGIDA: Available Cell con soporte de selección múltiple -->
+                            <div *ngIf="!cell.session && cell.isAvailable"
+                                 class="absolute inset-1 rounded-lg border transition-all duration-200 cursor-pointer group"
+                                 [class.border-dashed]="!isCellSelected(day, cell.teachingHour)"
+                                 [class.border-solid]="isCellSelected(day, cell.teachingHour)"
+                                 [class.border-emerald-300]="!isCellSelected(day, cell.teachingHour)"
+                                 [class.border-blue-500]="isCellSelected(day, cell.teachingHour)"
+                                 [class.bg-emerald-50]="!isCellSelected(day, cell.teachingHour)"
+                                 [class.bg-blue-100]="isCellSelected(day, cell.teachingHour)"
+                                 [class.hover:bg-emerald-100]="!isCellSelected(day, cell.teachingHour)"
+                                 [class.hover:bg-blue-200]="isCellSelected(day, cell.teachingHour)"
+                                 (click)="onCellClick(row, day, cell, $event)"
+                                 [matTooltip]="getCellTooltip(cell)"
+                                 matTooltipPosition="above">
+
+                              <!-- Contenido de la celda disponible -->
+                              <div class="flex items-center justify-center h-full">
+                                <!-- Icono normal cuando no está seleccionada -->
+                                <mat-icon *ngIf="!isCellSelected(day, cell.teachingHour)"
+                                          class="text-emerald-600 group-hover:scale-110 transition-transform">
+                                  add_circle_outline
+                                </mat-icon>
+
+                                <!-- Icono de selección cuando está seleccionada -->
+                                <div *ngIf="isCellSelected(day, cell.teachingHour)"
+                                     class="flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full">
+                                  <mat-icon class="text-sm">check</mat-icon>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Unavailable Cell (sin cambios) -->
+                            <div *ngIf="!cell.session && !cell.isAvailable"
+                                 class="absolute inset-1 rounded-lg bg-slate-100 flex items-center justify-center">
+                              <mat-icon class="text-slate-400 text-lg">block</mat-icon>
+                            </div>
+                        </ng-container>
+                  </div>
+          <!-- ✅ NUEVO: Panel flotante de selección múltiple -->
+                      <div *ngIf="multiSelection.isSelecting && multiSelection.selectedCells.size > 1"
+                           class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white rounded-xl shadow-2xl border border-slate-200 p-4 z-50 min-w-[400px]">
+
+                        <div class="flex items-center justify-between mb-3">
+                          <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                              <mat-icon class="text-blue-600 text-sm">selection_tool</mat-icon>
+                            </div>
+                            <div>
+                              <h4 class="font-medium text-slate-900">Selección Múltiple</h4>
+                              <p class="text-sm text-slate-600">{{ multiSelection.selectedCells.size }} celda(s) seleccionada(s)</p>
+                            </div>
+                          </div>
+
+                          <button
+                            mat-icon-button
+                            (click)="cancelMultiSelection()"
+                            class="w-8 h-8 hover:bg-slate-100 rounded-lg">
+                            <mat-icon class="text-slate-400">close</mat-icon>
+                          </button>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-lg p-3 mb-3">
+                          <div class="flex items-center space-x-2 text-sm">
+                            <mat-icon class="text-slate-600 text-base">schedule</mat-icon>
+                            <span class="font-medium text-slate-700">Horario:</span>
+                            <span class="text-slate-900">{{ getSelectionSummary() }}</span>
+                          </div>
+                        </div>
+
+                        <div class="flex space-x-3">
+                          <button
+                            mat-button
+                            (click)="clearMultiSelection()"
+                            class="text-slate-600 hover:bg-slate-100 px-4 py-2 rounded-lg transition-colors">
+                            Limpiar
+                          </button>
+
+                          <button
+                            mat-raised-button
+                            color="primary"
+                            (click)="applyMultiSelection()"
+                            [disabled]="!selectedGroup"
+                            class="px-6 py-2 rounded-lg">
+                            <mat-icon class="mr-2 text-sm">add</mat-icon>
+                            Asignar Clase
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- ✅ NUEVO: Overlay para instrucciones de uso -->
+                    <div *ngIf="selectedGroup && !multiSelection.isSelecting && scheduleHourRows.length > 0 && showInstructionTip"
+                         class="fixed bottom-6 right-6 bg-blue-50 border border-blue-200 rounded-lg p-3 max-w-sm z-40 shadow-lg transition-all duration-300"
+                         style="animation: slideInFromRight 0.5s ease-out;">
+
+                      <div class="flex items-start justify-between space-x-3">
+                        <!-- Contenido del tip -->
+                        <div class="flex items-start space-x-2 flex-1">
+                          <mat-icon class="text-blue-600 text-sm mt-0.5 flex-shrink-0">lightbulb</mat-icon>
+                          <div class="text-xs text-blue-800">
+                            <p class="font-semibold mb-1">💡 Selección Múltiple</p>
+                            <p class="mb-2">Mantén <kbd class="bg-white px-1.5 py-0.5 rounded border text-[10px] font-mono font-bold">Ctrl</kbd> + Click para seleccionar múltiples celdas consecutivas</p>
+
+                            <!-- Barra de progreso visual -->
+                            <div class="w-full bg-blue-200 rounded-full h-1 overflow-hidden mb-1">
+                              <div class="bg-blue-500 h-full rounded-full"
+                                   style="animation: shrinkWidth 15s linear forwards;"></div>
+                            </div>
+                            <p class="text-[10px] text-blue-600 opacity-75">Se oculta automáticamente en 15s</p>
+                          </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="flex flex-col space-y-1">
+                          <!-- Botón cerrar permanentemente -->
+                          <button
+                            mat-icon-button
+                            (click)="closeTip()"
+                            class="w-6 h-6 hover:bg-blue-100 rounded-full flex items-center justify-center"
+                            matTooltip="Cerrar permanentemente"
+                            matTooltipPosition="left">
+                            <mat-icon class="text-blue-600 text-sm">close</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    </div>
+                  </div>
+            </ng-container>
+            </ng-container>
+          </div>
+          </div>
+            </div>
+          </div>
+<div *ngIf="multiSelection.isSelecting && multiSelection.selectedCells.size > 1"
+     class="bg-blue-50 border-l-4 border-blue-500 p-3 mx-4 mb-4 rounded-r-lg">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <mat-icon class="text-blue-600">info</mat-icon>
+      <div class="text-sm">
+        <span class="font-medium text-blue-900">Modo selección múltiple activo</span>
+        <span class="text-blue-700 ml-2">{{ multiSelection.selectedCells.size }} celda(s) seleccionada(s)</span>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <button
+        mat-button
+        class="text-blue-600 hover:bg-blue-100 px-3 py-1 rounded text-sm"
+        (click)="clearMultiSelection()">
+        Limpiar selección
+      </button>
+
+      <button
+        mat-raised-button
+        color="primary"
+        class="px-4 py-1 text-sm"
+        (click)="applyMultiSelection()"
+        [disabled]="!selectedGroup">
+        Asignar clase
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Compact Empty State -->
+<div *ngIf="!selectedGroup && !loading" class="flex flex-col items-center justify-center py-20">
+  <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+    <mat-icon class="text-slate-400 text-2xl">event_available</mat-icon>
+  </div>
+  <h3 class="text-lg font-medium text-slate-900 mb-2">Seleccione un grupo</h3>
+  <p class="text-slate-500 text-center max-w-md">
+    Elija un grupo académico para visualizar y gestionar su horario
+  </p>
+</div>
+
+</div>
+</div>
+<!-- ✅ NUEVO: Overlay para cerrar filtros al hacer click fuera -->
+<div *ngIf="filtersExpanded"
+     class="fixed inset-0 bg-black/10 z-40"
+     (click)="closeFilters()">
+</div>

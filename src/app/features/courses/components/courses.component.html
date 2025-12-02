@@ -1,0 +1,438 @@
+<!-- src/app/features/courses/components/courses.component.html -->
+<div class="min-h-screen bg-gray-50 p-4 lg:p-6">
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- Header Section -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="space-y-2">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+              <mat-icon class="text-blue-600 !text-xl !w-5 !h-5">school</mat-icon>
+            </div>
+            <h1 class="text-2xl font-semibold text-gray-900">Gestión de Cursos</h1>
+          </div>
+          <p class="text-gray-600 text-sm lg:text-base">
+            Administra los cursos de la malla curricular por modalidades, carreras y ciclos
+          </p>
+        </div>
+
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="openCreateCourseDialog()"
+          class="!bg-blue-600 !text-white !rounded-xl !px-6 !py-3 !font-medium hover:!bg-blue-700 transition-colors">
+          <mat-icon class="!text-lg !w-5 !h-5 mr-2">add</mat-icon>
+          <span [class.hidden]="isHandset$ | async" class="lg:inline">Crear Curso</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-2xl font-bold text-blue-600">{{ totalCourses }}</div>
+            <div class="text-sm text-gray-600">Total Cursos</div>
+          </div>
+          <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+            <mat-icon class="text-blue-600 !text-lg !w-5 !h-5">school</mat-icon>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-2xl font-bold text-green-600">{{ theoryCourses }}</div>
+            <div class="text-sm text-gray-600">Teóricos</div>
+          </div>
+          <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+            <mat-icon class="text-green-600 !text-lg !w-5 !h-5">menu_book</mat-icon>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-2xl font-bold text-purple-600">{{ practiceCourses }}</div>
+            <div class="text-sm text-gray-600">Prácticos</div>
+          </div>
+          <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+            <mat-icon class="text-purple-600 !text-lg !w-5 !h-5">science</mat-icon>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-2xl font-bold text-orange-600">{{ mixedCourses }}</div>
+            <div class="text-sm text-gray-600">Mixtos</div>
+          </div>
+          <div class="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+            <mat-icon class="text-orange-600 !text-lg !w-5 !h-5">hub</mat-icon>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow col-span-2 md:col-span-1">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-2xl font-bold text-indigo-600">{{ totalTheoryHours + totalPracticeHours }}</div>
+            <div class="text-sm text-gray-600">Horas Totales</div>
+          </div>
+          <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center">
+            <mat-icon class="text-indigo-600 !text-lg !w-5 !h-5">schedule</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+            <mat-icon class="text-gray-600 !text-lg !w-4 !h-4">filter_list</mat-icon>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900">Filtros de Búsqueda</h3>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button mat-button (click)="clearFilters()" class="!text-gray-600 !text-sm !px-3 !py-2 hover:!bg-gray-100 !rounded-lg">
+            <mat-icon class="!text-base !w-4 !h-4 mr-1">clear</mat-icon>
+            Limpiar
+          </button>
+          <button mat-button (click)="expandAllPanels()" class="!text-gray-600 !text-sm !px-3 !py-2 hover:!bg-gray-100 !rounded-lg">
+            <mat-icon class="!text-base !w-4 !h-4 mr-1">expand_more</mat-icon>
+            Expandir
+          </button>
+          <button mat-button (click)="collapseAllPanels()" class="!text-gray-600 !text-sm !px-3 !py-2 hover:!bg-gray-100 !rounded-lg">
+            <mat-icon class="!text-base !w-4 !h-4 mr-1">expand_less</mat-icon>
+            Contraer
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <!-- Modalidad -->
+        <mat-form-field appearance="outline" class="!w-full filter-field">
+          <mat-label>Modalidad</mat-label>
+          <mat-select [formControl]="modalityFilter">
+            <mat-option value="">Todas</mat-option>
+            <mat-option *ngFor="let modality of modalities" [value]="modality.uuid">
+              <div class="py-1">
+                <div class="font-medium text-gray-900">{{ modality.name }}</div>
+                <div class="text-xs text-gray-500">{{ modality.durationYears }} años</div>
+              </div>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Carrera -->
+        <mat-form-field appearance="outline" class="!w-full filter-field">
+          <mat-label>Carrera</mat-label>
+          <mat-select [formControl]="careerFilter" [disabled]="!modalityFilter.value">
+            <mat-option value="">Todas</mat-option>
+            <mat-option *ngFor="let career of getFilteredCareers()" [value]="career.uuid">
+              {{ career.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Ciclo -->
+        <mat-form-field appearance="outline" class="!w-full filter-field">
+          <mat-label>Ciclo</mat-label>
+          <mat-select [formControl]="cycleFilter">
+            <mat-option value="">Todos</mat-option>
+            <mat-option *ngFor="let cycle of getAvailableCycles()" [value]="cycle">
+              Ciclo {{ cycle }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Área de Conocimiento -->
+        <mat-form-field appearance="outline" class="!w-full filter-field">
+          <mat-label>Área</mat-label>
+          <mat-select [formControl]="knowledgeAreaFilter">
+            <mat-option value="">Todas</mat-option>
+            <mat-option *ngFor="let area of knowledgeAreas" [value]="area.uuid">
+              <div class="py-1">
+                <div class="font-medium text-gray-900">{{ area.name }}</div>
+                <div class="text-xs text-gray-500">{{ area.department.name }}</div>
+              </div>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Tipo de Curso -->
+        <mat-form-field appearance="outline" class="!w-full filter-field">
+          <mat-label>Tipo</mat-label>
+          <mat-select [formControl]="typeFilter">
+            <mat-option value="">Todos</mat-option>
+            <mat-option value="THEORY">
+              <div class="flex items-center gap-2">
+                <mat-icon class="!text-green-600 !text-base !w-4 !h-4">menu_book</mat-icon>
+                <span>Teórico</span>
+              </div>
+            </mat-option>
+            <mat-option value="PRACTICE">
+              <div class="flex items-center gap-2">
+                <mat-icon class="!text-purple-600 !text-base !w-4 !h-4">science</mat-icon>
+                <span>Práctico</span>
+              </div>
+            </mat-option>
+            <mat-option value="MIXED">
+              <div class="flex items-center gap-2">
+                <mat-icon class="!text-orange-600 !text-base !w-4 !h-4">hub</mat-icon>
+                <span>Mixto</span>
+              </div>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Búsqueda -->
+        <mat-form-field appearance="outline" class="!w-full filter-field">
+          <mat-label>Buscar</mat-label>
+          <input matInput [formControl]="searchFilter" placeholder="Nombre o código...">
+          <mat-icon matSuffix class="!text-gray-400 !text-lg !w-5 !h-5">search</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center py-20">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center max-w-md mx-auto">
+        <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <mat-icon class="text-blue-600 !text-2xl !w-8 !h-8 animate-pulse">school</mat-icon>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Cargando cursos...</h3>
+        <p class="text-gray-600">Por favor espere mientras se cargan los datos</p>
+      </div>
+    </div>
+
+    <!-- No Data State -->
+    <div *ngIf="!loading && coursesGrouped.length === 0" class="flex justify-center items-center py-20">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center max-w-md mx-auto">
+        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <mat-icon class="text-gray-400 !text-2xl !w-8 !h-8">info</mat-icon>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No se encontraron cursos</h3>
+        <p class="text-gray-600 mb-6">No hay cursos que coincidan con los filtros aplicados.</p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <button mat-button (click)="clearFilters()" class="!text-blue-600 !border-blue-600 !rounded-lg">
+            <mat-icon class="!text-base !w-4 !h-4 mr-2">clear</mat-icon>
+            Limpiar filtros
+          </button>
+          <button mat-raised-button color="primary" (click)="openCreateCourseDialog()"
+                  class="!bg-blue-600 !text-white !rounded-lg">
+            <mat-icon class="!text-base !w-4 !h-4 mr-2">add</mat-icon>
+            Crear primer curso
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Courses Content -->
+    <div *ngIf="!loading && coursesGrouped.length > 0" class="space-y-6">
+
+      <div *ngFor="let modalityGroup of coursesGrouped; trackBy: trackByModalityId"
+           class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+        <!-- Modality Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <mat-icon class="text-white !text-xl !w-6 !h-6">school</mat-icon>
+              </div>
+              <div>
+                <h2 class="text-xl font-semibold text-white">{{ modalityGroup.modality.name }}</h2>
+                <div class="flex items-center gap-4 mt-1 text-blue-100 text-sm">
+                  <span class="flex items-center gap-1">
+                    <mat-icon class="!text-sm !w-4 !h-4">book</mat-icon>
+                    {{ modalityGroup.totalCourses }} cursos
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <mat-icon class="!text-sm !w-4 !h-4">schedule</mat-icon>
+                    {{ modalityGroup.modality.durationYears }} años
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Careers Content -->
+        <div class="p-6">
+          <mat-accordion multi="true" class="space-y-4">
+
+            <mat-expansion-panel
+              *ngFor="let careerGroup of modalityGroup.careers; trackBy: trackByCareerId"
+              [expanded]="isPanelExpanded(modalityGroup.modality.uuid + '-' + careerGroup.career.uuid)"
+              (expandedChange)="togglePanel(modalityGroup.modality.uuid + '-' + careerGroup.career.uuid)"
+              class="!shadow-none !border !border-gray-200 !rounded-xl overflow-hidden">
+
+              <mat-expansion-panel-header class="!bg-gray-50 !py-4 !px-6">
+                <mat-panel-title>
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <mat-icon class="text-blue-600 !text-base !w-4 !h-4">work</mat-icon>
+                    </div>
+                    <span class="font-medium text-gray-900">{{ careerGroup.career.name }}</span>
+                  </div>
+                </mat-panel-title>
+                <mat-panel-description>
+                  <div class="flex items-center gap-4 text-sm text-gray-600">
+                    <span class="flex items-center gap-1">
+                      <mat-icon class="!text-sm !w-3 !h-3">book</mat-icon>
+                      {{ careerGroup.totalCourses }}
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <mat-icon class="!text-sm !w-3 !h-3">schedule</mat-icon>
+                      {{ careerGroup.totalTheoryHours + careerGroup.totalPracticeHours }}h
+                    </span>
+                  </div>
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <!-- Cycles Content -->
+              <div class="p-6 space-y-6">
+
+                <div *ngFor="let cycleGroup of careerGroup.cycles; trackBy: trackByCycleNumber"
+                     class="space-y-4">
+
+                  <!-- Cycle Header -->
+                  <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                        <mat-icon class="text-indigo-600 !text-base !w-4 !h-4">school</mat-icon>
+                      </div>
+                      <h4 class="text-lg font-medium text-gray-900">Ciclo {{ cycleGroup.cycleNumber }}</h4>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
+                        {{ cycleGroup.totalCourses }} cursos
+                      </span>
+                      <span *ngIf="cycleGroup.totalTheoryHours > 0"
+                            class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
+                        {{ cycleGroup.totalTheoryHours }}h T
+                      </span>
+                      <span *ngIf="cycleGroup.totalPracticeHours > 0"
+                            class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">
+                        {{ cycleGroup.totalPracticeHours }}h P
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Courses Grid -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                    <div *ngFor="let course of cycleGroup.courses; trackBy: trackByCourseId"
+                         class="group bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md hover:border-blue-200 transition-all duration-200 relative">
+
+                      <!-- Course Actions (Hidden by default, shown on hover) -->
+                      <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+                        <button mat-icon-button (click)="openEditCourseDialog(course)"
+                                class="!w-8 !h-8 !bg-white !shadow-sm hover:!bg-blue-50 !text-blue-600">
+                          <mat-icon class="!text-sm !w-4 !h-4">edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="confirmDeleteCourse(course)"
+                                class="!w-8 !h-8 !bg-white !shadow-sm hover:!bg-red-50 !text-red-600">
+                          <mat-icon class="!text-sm !w-4 !h-4">delete</mat-icon>
+                        </button>
+                      </div>
+
+                      <!-- Course Header -->
+                      <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1 min-w-0">
+                          <h5 class="font-medium text-gray-900 truncate mb-1">{{ course.name }}</h5>
+                          <span class="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs font-mono rounded">
+                            {{ course.code }}
+                          </span>
+                        </div>
+                        <div class="ml-2">
+                          <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
+                                [ngClass]="{
+                                  'bg-green-50 text-green-700': getCourseTypeText(course) === 'Teórico',
+                                  'bg-purple-50 text-purple-700': getCourseTypeText(course) === 'Práctico',
+                                  'bg-orange-50 text-orange-700': getCourseTypeText(course) === 'Mixto'
+                                }">
+                            <mat-icon class="!text-xs !w-3 !h-3">{{ getCourseTypeIcon(course) }}</mat-icon>
+                            {{ getCourseTypeText(course) }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <!-- Course Details -->
+                      <div class="space-y-2 text-sm">
+                        <!-- Hours -->
+                        <div class="flex flex-wrap gap-2">
+                          <span *ngIf="course.weeklyTheoryHours > 0"
+                                class="flex items-center gap-1 text-green-600">
+                            <mat-icon class="!text-xs !w-3 !h-3">menu_book</mat-icon>
+                            {{ course.weeklyTheoryHours }}h T
+                          </span>
+                          <span *ngIf="course.weeklyPracticeHours > 0"
+                                class="flex items-center gap-1 text-purple-600">
+                            <mat-icon class="!text-xs !w-3 !h-3">science</mat-icon>
+                            {{ course.weeklyPracticeHours }}h P
+                          </span>
+                          <span class="flex items-center gap-1 text-gray-600 font-medium">
+                            <mat-icon class="!text-xs !w-3 !h-3">schedule</mat-icon>
+                            {{ getTotalHours(course) }}h total
+                          </span>
+                        </div>
+
+                        <!-- Knowledge Area -->
+                        <div class="flex items-center gap-1 text-gray-600">
+                          <mat-icon class="!text-xs !w-3 !h-3">category</mat-icon>
+                          <span class="truncate">{{ course.teachingKnowledgeArea.name }}</span>
+                        </div>
+
+                        <!-- Specialty (if applicable) -->
+                        <div *ngIf="course.preferredSpecialty" class="flex items-center gap-1 text-gray-600">
+                          <mat-icon class="!text-xs !w-3 !h-3">precision_manufacturing</mat-icon>
+                          <span class="truncate">{{ course.preferredSpecialty.name }}</span>
+                        </div>
+                      </div>
+
+                      <!-- Teaching Types -->
+                      <div class="flex flex-wrap gap-1 mt-3" *ngIf="course.teachingTypes?.length">
+                        <span *ngFor="let type of course.teachingTypes"
+                              class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs"
+                              [ngClass]="{
+                                'bg-green-50 text-green-700': type.name === 'THEORY',
+                                'bg-purple-50 text-purple-700': type.name === 'PRACTICE'
+                              }">
+                          <mat-icon class="!text-xs !w-2.5 !h-2.5">
+                            {{ type.name === 'THEORY' ? 'menu_book' : 'science' }}
+                          </mat-icon>
+                          {{ type.name === 'THEORY' ? 'Teórico' : 'Práctico' }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Add Course Card -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center text-center min-h-[200px] hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer group"
+                         (click)="openCreateCourseDialog()">
+                      <div class="w-12 h-12 bg-gray-100 group-hover:bg-blue-100 rounded-full flex items-center justify-center mb-3 transition-colors">
+                        <mat-icon class="text-gray-400 group-hover:text-blue-600 !text-xl !w-6 !h-6 transition-colors">add</mat-icon>
+                      </div>
+                      <span class="text-gray-600 group-hover:text-blue-700 font-medium transition-colors">
+                        Agregar curso al Ciclo {{ cycleGroup.cycleNumber }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

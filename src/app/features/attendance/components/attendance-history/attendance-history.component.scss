@@ -1,0 +1,245 @@
+// src/app/features/attendance/components/attendance-history/attendance-history.component.scss
+
+.attendance-history {
+
+  // ==================== FILTROS ====================
+  .filters-container {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding: 16px;
+    background: #f5f5f5;
+    border-radius: 8px;
+
+    .date-field {
+      width: 200px;
+    }
+
+    .spacer {
+      flex: 1;
+    }
+
+    button {
+      height: 40px;
+
+      mat-icon {
+        margin-right: 4px;
+      }
+    }
+  }
+
+  .search-field {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  // ==================== LOADING ====================
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+
+    mat-spinner {
+      margin-bottom: 16px;
+    }
+
+    p {
+      color: #757575;
+      margin: 0;
+    }
+  }
+
+  // ==================== TABLA ====================
+  .table-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .attendance-table {
+      width: 100%;
+
+      th {
+        background: #fafafa;
+        font-weight: 600;
+        color: #424242;
+        padding: 16px 12px;
+      }
+
+      td {
+        padding: 12px;
+      }
+
+      tr:hover {
+        background: #f5f5f5;
+      }
+
+      // Columna: Fecha
+      .date-cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+
+        mat-icon {
+          color: #757575;
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+
+      // Columna: Curso
+      .course-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        strong {
+          color: #424242;
+        }
+
+        .course-code {
+          font-size: 12px;
+          color: #9e9e9e;
+        }
+      }
+
+      // Columna: Hora
+      .time-cell {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+
+        .time-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+          color: #757575;
+        }
+      }
+
+      // Columna: Duración
+      .duration-cell {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        mat-icon {
+          color: #757575;
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+
+      // Columna: Penalizaciones
+      .penalties-cell {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+
+        .penalty-chip {
+          height: 28px;
+          font-size: 12px;
+
+          &.late {
+            background: #ffebee;
+            color: #c62828;
+          }
+
+          &.early {
+            background: #fff3e0;
+            color: #e65100;
+          }
+
+          mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+            margin-right: 4px;
+          }
+        }
+
+        .no-penalty {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          color: #4caf50;
+          font-size: 13px;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+
+      // Sin datos
+      .no-data {
+        color: #9e9e9e;
+        font-style: italic;
+      }
+
+      .no-data-row {
+        height: 200px;
+
+        .no-data-message {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 40px;
+
+          mat-icon {
+            font-size: 48px;
+            width: 48px;
+            height: 48px;
+            color: #bdbdbd;
+            margin-bottom: 12px;
+          }
+
+          p {
+            color: #9e9e9e;
+            margin: 0;
+          }
+        }
+      }
+    }
+
+    mat-paginator {
+      border-top: 1px solid #e0e0e0;
+    }
+  }
+}
+
+// ==================== RESPONSIVE ====================
+@media (max-width: 768px) {
+  .attendance-history {
+    .filters-container {
+      .date-field {
+        width: 100%;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+
+    .table-container {
+      .attendance-table {
+        font-size: 14px;
+
+        th, td {
+          padding: 8px;
+        }
+      }
+    }
+  }
+}

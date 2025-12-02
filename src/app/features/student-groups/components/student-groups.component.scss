@@ -1,0 +1,156 @@
+/* src/app/features/student-groups/components/student-groups.component.scss */
+
+// Estilos específicos para Angular Material que necesitan override
+.filter-field {
+  .mat-mdc-form-field {
+    &.mat-form-field-appearance-outline {
+      .mat-mdc-form-field-outline {
+        border-radius: 12px !important;
+      }
+
+      .mat-mdc-form-field-outline-thick {
+        border-radius: 12px !important;
+      }
+    }
+  }
+
+  .mat-mdc-select-panel {
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  }
+}
+
+// Mejoras para los botones de Material Design
+.mat-mdc-raised-button {
+  &.mat-primary {
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2), 0 2px 4px -1px rgba(59, 130, 246, 0.1) !important;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3), 0 4px 6px -2px rgba(59, 130, 246, 0.2) !important;
+    }
+  }
+}
+
+.mat-mdc-icon-button {
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+// Animaciones suaves para las cards
+.group {
+  &:hover {
+    .mat-mdc-icon-button {
+      opacity: 1 !important;
+    }
+  }
+}
+
+// Estilos para chips de Material Design
+.mat-mdc-chip {
+  &.mat-mdc-standard-chip {
+    border-radius: 8px !important;
+
+    &.mat-primary {
+      background-color: rgb(59 130 246) !important;
+      color: white !important;
+    }
+  }
+}
+
+// Mejoras para tooltips
+.mat-mdc-tooltip {
+  border-radius: 8px !important;
+  font-size: 0.75rem !important;
+}
+
+// Optimizaciones responsive
+@media (max-width: 768px) {
+  .hidden {
+    display: none !important;
+  }
+}
+
+// Transiciones suaves para todos los elementos interactivos
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+// Estilos para el estado de loading si lo necesitas
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Mejoras para el focus
+.mat-mdc-form-field.mat-focused {
+  .mat-mdc-form-field-outline-thick {
+    border-color: rgb(59 130 246) !important;
+  }
+}
+
+// Asegurar que los iconos de Material tengan el tamaño correcto
+mat-icon {
+  &.text-sm {
+    font-size: 14px !important;
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  &.text-lg {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  &.text-xl {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  &.text-2xl {
+    font-size: 24px !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  &.text-4xl {
+    font-size: 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+  }
+}
+
+// Mejoras para el scrollbar si es necesario
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+
+  &:hover {
+    background: #a8a8a8;
+  }
+}
