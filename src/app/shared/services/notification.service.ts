@@ -20,7 +20,7 @@ export interface CourseAssignmentSummary {
 
 export interface GroupNotification {
   id: string;
-  type: 'MISSING_COURSES' | 'INCOMPLETE_HOURS' | 'UNASSIGNED_GROUP';
+  type: 'MISSING_COURSES' | 'INCOMPLETE_HOURS' | 'UNASSIGNED_GROUP' | 'CLASS_REMINDER'; // ✅ AGREGAR
   severity: 'high' | 'medium' | 'low';
   title: string;
   message: string;
@@ -32,6 +32,11 @@ export interface GroupNotification {
     missingCourses?: number;
     totalMissingHours?: number;
     courses?: CourseAssignmentSummary[];
+    // ✅ AGREGAR PARA CLASS_REMINDER
+    courseName?: string;
+    spaceName?: string;
+    startTime?: string;
+    minutesUntilStart?: number;
   };
   timestamp: Date;
   actionUrl?: string;
@@ -342,7 +347,8 @@ export class NotificationService extends BaseApiService {
     const icons = {
       MISSING_COURSES: 'warning',
       INCOMPLETE_HOURS: 'schedule_send',
-      UNASSIGNED_GROUP: 'error_outline'
+      UNASSIGNED_GROUP: 'error_outline',
+      CLASS_REMINDER: 'notifications_active'
     };
     return icons[type] || 'info';
   }
@@ -400,4 +406,44 @@ export class NotificationService extends BaseApiService {
       unread: this.unreadCountSubject.getValue()
     };
   }
+
+  //nuevo
+
+  /**
+   * ✅ NUEVO: Agregar notificación de clase próxima
+   */
+  addClassNotification(notification: GroupNotification): void {
+    const currentNotifications = this.notificationsSubject.getValue();
+
+    // Agregar al inicio de la lista (más recientes primero)
+    const updatedNotifications = [notification, ...currentNotifications];
+
+    this.notificationsSubject.next(updatedNotifications);
+    this.updateUnreadCount();
+
+    console.log('🔔 Notificación de clase agregada:', notification.title);
+  }
+
+  /**
+   * ✅ NUEVO: Limpiar notificaciones antiguas de clases
+   */
+  clearOldClassNotifications(): void {
+    const currentNotifications = this.notificationsSubject.getValue();
+    const now = new Date();
+
+    // Mantener solo las notificaciones de clases de los últimos 30 minutos
+    const filtered = currentNotifications.filter(n => {
+      if (n.type === 'CLASS_REMINDER') {
+        const age = now.getTime() - n.timestamp.getTime();
+        return age < 30 * 60 * 1000; // 30 minutos
+      }
+      return true; // Mantener otras notificaciones
+    });
+
+    if (filtered.length !== currentNotifications.length) {
+      this.notificationsSubject.next(filtered);
+      this.updateUnreadCount();
+    }
+  }
+
 }

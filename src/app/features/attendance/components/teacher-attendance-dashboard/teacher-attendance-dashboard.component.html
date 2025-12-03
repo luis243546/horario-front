@@ -183,6 +183,101 @@
       </div>
     </mat-tab>
 
+
+    //nuevo tab
+
+    <!-- TAB 2: Mi Horario Semanal -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">calendar_view_week</mat-icon>
+        Mi Horario
+      </ng-template>
+
+      <div class="tab-content">
+        <!-- Loading -->
+        <div class="loading-container" *ngIf="loadingWeeklySchedule">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Cargando horario semanal...</p>
+        </div>
+
+        <!-- Horario semanal -->
+        <div class="weekly-schedule" *ngIf="!loadingWeeklySchedule">
+          <div class="week-header">
+            <h2>
+              <mat-icon>event</mat-icon>
+              Mi Horario Semanal
+            </h2>
+            <p class="subtitle">Todas tus clases programadas para esta semana</p>
+          </div>
+
+          <!-- Grid de días -->
+          <div class="days-grid">
+            <mat-card
+              *ngFor="let day of weekDays"
+              class="day-card"
+              [class.today]="isToday(day)"
+              [class.no-classes]="!hasSessions(day)">
+
+              <mat-card-header>
+                <div mat-card-avatar class="day-avatar" [class.today-avatar]="isToday(day)">
+                  <mat-icon>{{ isToday(day) ? 'today' : 'event' }}</mat-icon>
+                </div>
+                <mat-card-title>
+                  {{ weekDayNames[day] }}
+                  <mat-chip *ngIf="isToday(day)" color="primary" selected>Hoy</mat-chip>
+                </mat-card-title>
+                <mat-card-subtitle>
+                  {{ hasSessions(day) ? getSessionsForDay(day).length + ' clase(s)' : 'Sin clases' }}
+                  <span *ngIf="hasSessions(day)" class="total-hours">
+                    · {{ formatMinutesToHours(getTotalHoursForDay(day)) }}
+                  </span>
+                </mat-card-subtitle>
+              </mat-card-header>
+
+              <mat-card-content>
+                <!-- Sin clases -->
+                <div class="no-classes-message" *ngIf="!hasSessions(day)">
+                  <mat-icon>event_busy</mat-icon>
+                  <span>No tienes clases programadas</span>
+                </div>
+
+                <!-- Lista de clases -->
+                <div class="classes-list" *ngIf="hasSessions(day)">
+                  <div
+                    *ngFor="let session of getSessionsForDay(day)"
+                    class="class-item">
+
+                    <div class="class-time">
+                      <mat-icon class="time-icon">schedule</mat-icon>
+                      <span class="time-text">{{ getSessionTime(session) }}</span>
+                    </div>
+
+                    <div class="class-details">
+                      <div class="class-name">
+                        <mat-icon class="course-icon">{{ session.sessionType?.name === 'THEORY' ? 'menu_book' : 'science' }}</mat-icon>
+                        <strong>{{ session.course?.name }}</strong>
+                      </div>
+
+                      <div class="class-meta">
+                        <span class="group">
+                          <mat-icon>groups</mat-icon>
+                          {{ session.studentGroup?.name }}
+                        </span>
+                        <span class="space">
+                          <mat-icon>room</mat-icon>
+                          {{ session.learningSpace?.name }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
     <!-- TAB 2: Historial -->
     <mat-tab>
       <ng-template mat-tab-label>

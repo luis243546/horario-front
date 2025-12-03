@@ -390,3 +390,236 @@
     color: white !important;
   }
 }
+
+
+// ==================== MI HORARIO SEMANAL ====================
+.weekly-schedule {
+  .week-header {
+    margin-bottom: 24px;
+    text-align: center;
+
+    h2 {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 0 0 8px 0;
+      color: #333;
+      font-size: 28px;
+      font-weight: 600;
+
+      mat-icon {
+        color: #667eea;
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 16px;
+      margin: 0;
+    }
+  }
+
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+
+    .day-card {
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+
+      &:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-4px);
+      }
+
+      &.today {
+        border-left-color: #667eea;
+        background: linear-gradient(to right, rgba(102, 126, 234, 0.08), white);
+      }
+
+      &.no-classes {
+        opacity: 0.7;
+      }
+
+      mat-card-header {
+        .day-avatar {
+          background: #e3f2fd;
+          color: #1976d2;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          &.today-avatar {
+            background: #667eea;
+            color: white;
+          }
+
+          mat-icon {
+            font-size: 28px;
+            width: 28px;
+            height: 28px;
+          }
+        }
+
+        mat-card-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 600;
+          color: #333;
+
+          mat-chip {
+            height: 24px;
+            font-size: 12px;
+            font-weight: 600;
+          }
+        }
+
+        mat-card-subtitle {
+          color: #666;
+          font-size: 14px;
+
+          .total-hours {
+            color: #667eea;
+            font-weight: 500;
+          }
+        }
+      }
+
+      mat-card-content {
+        padding-top: 16px;
+
+        .no-classes-message {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 32px 16px;
+          text-align: center;
+          color: #999;
+
+          mat-icon {
+            font-size: 48px;
+            width: 48px;
+            height: 48px;
+            margin-bottom: 8px;
+            opacity: 0.5;
+          }
+
+          span {
+            font-size: 14px;
+          }
+        }
+
+        .classes-list {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+
+          .class-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+            transition: all 0.2s ease;
+
+            &:hover {
+              background: #e8eaf6;
+              transform: translateX(4px);
+            }
+
+            .class-time {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              min-width: 80px;
+              padding: 8px;
+              background: white;
+              border-radius: 6px;
+              border: 1px solid #e0e0e0;
+
+              .time-icon {
+                color: #667eea;
+                font-size: 20px;
+                width: 20px;
+                height: 20px;
+                margin-bottom: 4px;
+              }
+
+              .time-text {
+                font-size: 13px;
+                font-weight: 600;
+                color: #333;
+                white-space: nowrap;
+              }
+            }
+
+            .class-details {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              gap: 6px;
+
+              .class-name {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+
+                .course-icon {
+                  color: #667eea;
+                  font-size: 20px;
+                  width: 20px;
+                  height: 20px;
+                }
+
+                strong {
+                  color: #333;
+                  font-size: 15px;
+                  font-weight: 600;
+                }
+              }
+
+              .class-meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                font-size: 13px;
+                color: #666;
+
+                span {
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+
+                  mat-icon {
+                    font-size: 16px;
+                    width: 16px;
+                    height: 16px;
+                    color: #999;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .weekly-schedule {
+    .days-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

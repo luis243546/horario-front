@@ -24,6 +24,7 @@ import { AuthService } from '../../../../shared/services/auth.service';
 import { MeService } from '../../../../shared/services/me.service'; // ✅ AGREGADO
 import { ClassSessionService } from '../../../schedule-assignment/services/class-session.service';
 
+
 // Models
 import {
   TeacherAttendanceResponse,
@@ -38,6 +39,7 @@ import { ClassSessionResponse } from '../../../schedule-assignment/models/class-
 // Components
 import { AttendanceHistoryComponent } from '../attendance-history/attendance-history.component';
 import { AttendanceStatsCardComponent } from '../attendance-stats-card/attendance-stats-card.component';
+import {ClassNotificationService} from '../../services/class-notification.service';
 
 /**
  * Interfaz para las sesiones del día actual con estado de asistencia
@@ -84,6 +86,7 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private meService = inject(MeService); // ✅ AGREGADO
   private classSessionService = inject(ClassSessionService);
+  private notificationService = inject(ClassNotificationService); // ✅ AGREGAR ESTA LÍNEA
 
   // Estado
   teacherUuid: string = '';
@@ -97,6 +100,20 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
   todaySessions: SessionWithAttendance[] = [];
   loadingSessions: boolean = false;
   loadingProfile: boolean = false; // ✅ AGREGADO
+
+  // ✅ NUEVO: Horario semanal completo
+  weeklySchedule: Map<string, ClassSessionResponse[]> = new Map();
+  loadingWeeklySchedule: boolean = false;
+  weekDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+  weekDayNames: Record<string, string> = {
+    'MONDAY': 'Lunes',
+    'TUESDAY': 'Martes',
+    'WEDNESDAY': 'Miércoles',
+    'THURSDAY': 'Jueves',
+    'FRIDAY': 'Viernes',
+    'SATURDAY': 'Sábado',
+    'SUNDAY': 'Domingo'
+  };
 
   // Asistencias pendientes
   pendingAttendances: TeacherAttendanceResponse[] = [];
@@ -117,6 +134,7 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.notificationService.stopMonitoring(); // ✅ AGREGAR ESTA LÍNEA
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -165,6 +183,9 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
           // Ahora sí, inicializar el resto del componente
           this.startClock();
           this.loadTodayData();
+          this.loadWeeklySchedule(); // ✅ AGREGAR ESTA LÍNEA
+          // ✅ INICIAR MONITOREO DE NOTIFICACIONES
+          this.notificationService.startMonitoring(this.teacherUuid);
 
           // Refrescar datos cada 30 segundos
           interval(30000)
@@ -302,6 +323,64 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
           });
 
           this.snackBar.open('Error al cargar horario del día', 'Cerrar', {
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
+        }
+      });
+  }
+
+  /**
+   * ✅ NUEVO: Cargar horario semanal completo del docente
+   */
+  private loadWeeklySchedule(): void {
+    if (!this.teacherUuid) {
+      console.warn('⚠️ No se puede cargar horario sin teacherUuid');
+      return;
+    }
+
+    this.loadingWeeklySchedule = true;
+
+    this.classSessionService.getSessionsByTeacher(this.teacherUuid)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.loadingWeeklySchedule = false)
+      )
+      .subscribe({
+        next: (response) => {
+          const allSessions = Array.isArray(response.data) ? response.data : [response.data];
+
+          console.log('📅 Horario semanal cargado:', {
+            totalSessions: allSessions.length,
+            sessions: allSessions
+          });
+
+          // Agrupar sesiones por día de la semana
+          this.weeklySchedule.clear();
+
+          this.weekDays.forEach(day => {
+            const daySessions = allSessions
+              .filter(session => session.dayOfWeek === day)
+              .sort((a, b) => {
+                // Ordenar por hora de inicio
+                const timeA = a.teachingHours[0]?.startTime || '00:00:00';
+                const timeB = b.teachingHours[0]?.startTime || '00:00:00';
+                return timeA.localeCompare(timeB);
+              });
+
+            if (daySessions.length > 0) {
+              this.weeklySchedule.set(day, daySessions);
+            }
+          });
+
+          console.log('📊 Horario agrupado por día:', {
+            days: Array.from(this.weeklySchedule.keys()),
+            totalDays: this.weeklySchedule.size
+          });
+        },
+        error: (error) => {
+          console.error('❌ Error al cargar horario semanal:', error);
+          this.snackBar.open('Error al cargar horario semanal', 'Cerrar', {
             duration: 3000,
             panelClass: ['error-snackbar']
           });
@@ -694,4 +773,66 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
 
     return `${this.formatTime(firstHour.startTime)} - ${this.formatTime(lastHour.endTime)}`;
   }
+
+  //agregado
+
+  /**
+   * ✅ Obtiene las sesiones de un día específico
+   */
+  getSessionsForDay(day: string): ClassSessionResponse[] {
+    return this.weeklySchedule.get(day) || [];
+  }
+
+  /**
+   * ✅ Verifica si un día tiene clases
+   */
+  hasSessions(day: string): boolean {
+    const sessions = this.weeklySchedule.get(day);
+    return sessions !== undefined && sessions.length > 0;
+  }
+
+  /**
+   * ✅ Obtiene el total de horas de un día
+   */
+  getTotalHoursForDay(day: string): number {
+    const sessions = this.weeklySchedule.get(day) || [];
+    return sessions.reduce((total, session) => {
+      const minutes = session.teachingHours?.reduce(
+        (sum, hour) => sum + hour.durationMinutes,
+        0
+      ) || 0;
+      return total + minutes;
+    }, 0);
+  }
+
+  /**
+   * ✅ Formatea minutos a formato "Xh Ymin"
+   */
+  formatMinutesToHours(minutes: number): string {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+
+    if (hours > 0 && mins > 0) {
+      return `${hours}h ${mins}min`;
+    } else if (hours > 0) {
+      return `${hours}h`;
+    } else {
+      return `${mins}min`;
+    }
+  }
+
+  /**
+   * ✅ Obtiene el día actual de la semana
+   */
+  getCurrentDayOfWeek(): string {
+    return this.getDayOfWeekName(new Date());
+  }
+
+  /**
+   * ✅ Verifica si es el día actual
+   */
+  isToday(day: string): boolean {
+    return day === this.getCurrentDayOfWeek();
+  }
+
 }
