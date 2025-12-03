@@ -1,7 +1,9 @@
 // src/app/features/attendance/components/teacher-attendance-dashboard/teacher-attendance-dashboard.component.ts
+// ✅ VERSIÓN CORREGIDA - USA MeService para obtener teacherUuid
+
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil, interval, map, switchMap, of, combineLatest } from 'rxjs';
+import { Subject, takeUntil, interval, map, switchMap, of, combineLatest, finalize } from 'rxjs';
 
 // Angular Material
 import { MatCardModule } from '@angular/material/card';
@@ -19,6 +21,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { TeacherAttendanceService } from '../../services/teacher-attendance.service';
 import { CalendarExceptionService } from '../../services/calendar-exception.service';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { MeService } from '../../../../shared/services/me.service'; // ✅ AGREGADO
 import { ClassSessionService } from '../../../schedule-assignment/services/class-session.service';
 
 // Models
@@ -79,6 +82,7 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
   private attendanceService = inject(TeacherAttendanceService);
   private calendarService = inject(CalendarExceptionService);
   private authService = inject(AuthService);
+  private meService = inject(MeService); // ✅ AGREGADO
   private classSessionService = inject(ClassSessionService);
 
   // Estado
@@ -92,6 +96,7 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
   // Sesiones del día
   todaySessions: SessionWithAttendance[] = [];
   loadingSessions: boolean = false;
+  loadingProfile: boolean = false; // ✅ AGREGADO
 
   // Asistencias pendientes
   pendingAttendances: TeacherAttendanceResponse[] = [];
@@ -117,28 +122,68 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
   }
 
   private initializeComponent(): void {
-    // Obtener información del docente actual
-    const userInfo = this.authService.getUserInfo();
-    this.teacherUuid = userInfo?.['teacher']?.uuid || '';
-    this.teacherName = this.authService.getUserDisplayName();
+    console.log('🔍 TeacherAttendanceDashboard - Inicializando...');
 
-    if (!this.teacherUuid) {
-      this.snackBar.open('Error: No se pudo obtener información del docente', 'Cerrar', {
-        duration: 5000
+    // ✅ CORREGIDO: Obtener información del docente desde el backend
+    this.loadTeacherProfile();
+  }
+
+  /**
+   * ✅ NUEVO MÉTODO: Carga el perfil del docente desde el backend
+   */
+  private loadTeacherProfile(): void {
+    this.loadingProfile = true;
+
+    this.meService.getCurrentUserProfile()
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.loadingProfile = false)
+      )
+      .subscribe({
+        next: (response) => {
+          console.log('✅ Perfil de usuario recibido:', response.data);
+
+          const profile = response.data;
+
+          // Verificar que sea un docente
+          if (profile.role !== 'TEACHER' || !profile.teacher) {
+            console.error('❌ El usuario no es un docente o no tiene información de teacher');
+            this.snackBar.open('Error: El usuario actual no es un docente', 'Cerrar', {
+              duration: 5000,
+              panelClass: ['error-snackbar']
+            });
+            return;
+          }
+
+          // ✅ ASIGNAR EL UUID DEL TEACHER
+          this.teacherUuid = profile.teacher.uuid;
+          this.teacherName = profile.teacher.fullName;
+
+          console.log('✅ TeacherUUID obtenido:', this.teacherUuid);
+          console.log('✅ TeacherName:', this.teacherName);
+
+          // Ahora sí, inicializar el resto del componente
+          this.startClock();
+          this.loadTodayData();
+
+          // Refrescar datos cada 30 segundos
+          interval(30000)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(() => this.loadTodayData());
+        },
+        error: (error) => {
+          console.error('❌ Error al cargar perfil del docente:', error);
+
+          this.snackBar.open(
+            'Error: No se pudo obtener información del docente',
+            'Cerrar',
+            {
+              duration: 5000,
+              panelClass: ['error-snackbar']
+            }
+          );
+        }
       });
-      return;
-    }
-
-    // Actualizar reloj cada segundo
-    this.startClock();
-
-    // Cargar datos iniciales
-    this.loadTodayData();
-
-    // Refrescar datos cada 30 segundos
-    interval(30000)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.loadTodayData());
   }
 
   private startClock(): void {
@@ -163,7 +208,19 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
   }
 
   private loadTodayData(): void {
+    if (!this.teacherUuid) {
+      console.warn('⚠️ No se puede cargar datos sin teacherUuid');
+      return;
+    }
+
     const today = new Date().toISOString().split('T')[0];
+    const dayOfWeekToday = this.getDayOfWeekName(new Date());
+
+    console.log('🔍 DEBUG - loadTodayData iniciado:', {
+      teacherUuid: this.teacherUuid,
+      today: today,
+      dayOfWeek: dayOfWeekToday
+    });
 
     this.loadingSessions = true;
 
@@ -173,42 +230,81 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
       this.attendanceService.getAttendancesByTeacherAndDate(this.teacherUuid, today),
       this.calendarService.isHoliday(today)
     ])
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.loadingSessions = false)
+      )
       .subscribe({
         next: ([sessionsResponse, attendancesResponse, holidayResponse]) => {
+          console.log('📊 Datos cargados del backend:', {
+            sessionsResponse: sessionsResponse,
+            sessions: sessionsResponse.data,
+            sessionsCount: Array.isArray(sessionsResponse.data) ? sessionsResponse.data.length : 1,
+            attendances: attendancesResponse.data,
+            holiday: holidayResponse.data
+          });
+
           const allSessions = Array.isArray(sessionsResponse.data)
             ? sessionsResponse.data
             : [sessionsResponse.data];
+
+          console.log('📋 TODAS las sesiones del docente:', {
+            total: allSessions.length,
+            sessions: allSessions.map(s => ({
+              uuid: s.uuid,
+              dayOfWeek: s.dayOfWeek,
+              course: s.course?.name,
+              group: s.studentGroup?.name,
+              hours: s.teachingHours?.length || 0
+            }))
+          });
 
           const todayAttendances = Array.isArray(attendancesResponse.data)
             ? attendancesResponse.data
             : [attendancesResponse.data];
 
-          this.isHoliday = holidayResponse.data;
+          // Verificar si es feriado
+          this.isHoliday = holidayResponse.data || false;
 
-          // Filtrar sesiones del día actual (comparar día de la semana)
-          const todayDayOfWeek = this.getDayOfWeekName(new Date());
+          // Filtrar sesiones de hoy
+          const dayOfWeek = this.getDayOfWeekName(new Date());
+          console.log('🔍 Filtrando por día:', dayOfWeek);
+
           const todaySessions = allSessions.filter(
-            session => session.dayOfWeek === todayDayOfWeek
+            session => session.dayOfWeek === dayOfWeek
           );
 
-          // Combinar sesiones con sus asistencias
+          console.log('✅ Sesiones filtradas para HOY:', {
+            dayOfWeek: dayOfWeek,
+            filtered: todaySessions.length,
+            sessions: todaySessions.map(s => ({
+              uuid: s.uuid,
+              course: s.course?.name,
+              group: s.studentGroup?.name
+            }))
+          });
+
+          // Combinar sesiones con asistencias
           this.todaySessions = this.combineSessionsWithAttendances(
             todaySessions,
             todayAttendances
           );
 
-          // Filtrar asistencias pendientes (sin checkout)
-          this.pendingAttendances = todayAttendances.filter(
-            att => !att.checkoutAt && att.status === AttendanceStatus.PENDING
-          );
-
-          this.loadingSessions = false;
+          console.log('✅ Sesiones del día procesadas:', this.todaySessions.length);
         },
         error: (error) => {
-          console.error('Error cargando datos del día:', error);
-          this.snackBar.open('Error al cargar datos', 'Cerrar', { duration: 3000 });
-          this.loadingSessions = false;
+          console.error('❌ Error al cargar datos del día:', error);
+          console.error('❌ Error detallado:', {
+            status: error.status,
+            statusText: error.statusText,
+            message: error.message,
+            error: error.error
+          });
+
+          this.snackBar.open('Error al cargar horario del día', 'Cerrar', {
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
         }
       });
   }
@@ -217,50 +313,113 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
     sessions: ClassSessionResponse[],
     attendances: TeacherAttendanceResponse[]
   ): SessionWithAttendance[] {
+    const now = new Date();
+    const currentTime = now.toTimeString().split(' ')[0]; // HH:mm:ss
+
+    console.log('🔍 DEBUG - combineSessionsWithAttendances:', {
+      sessions: sessions.length,
+      attendances: attendances.length,
+      currentTime: currentTime,
+      isHoliday: this.isHoliday
+    });
+
     return sessions.map(session => {
-      const attendance = attendances.find(
-        att => att.classSession?.uuid === session.uuid
-      );
+      // Buscar asistencia correspondiente
+      const attendance = attendances.find(att => att.classSession?.uuid === session.uuid);
 
-      const now = new Date();
-      const currentTime = now.toTimeString().split(' ')[0]; // HH:mm:ss
+      console.log(`🔍 Procesando sesión ${session.course?.name}:`, {
+        sessionUuid: session.uuid,
+        attendance: attendance ? 'SÍ' : 'NO',
+        attendanceUuid: attendance?.uuid,
+        checkinAt: attendance?.checkinAt,
+        checkoutAt: attendance?.checkoutAt
+      });
 
-      // Obtener la primera hora pedagógica de la sesión
-      const firstHour = session.teachingHours?.[0];
-      const scheduledStart = firstHour?.startTime;
+      // Obtener horario de la sesión
+      const firstHour = session.teachingHours[0];
+      const lastHour = session.teachingHours[session.teachingHours.length - 1];
+      const scheduledStart = firstHour.startTime;
+      const scheduledEnd = lastHour.endTime;
+
+      // Calcular si es hora de clase (30 minutos antes hasta que termine)
+      const [schedH, schedM] = scheduledStart.split(':').map(Number);
+      const [endH, endM] = scheduledEnd.split(':').map(Number);
+      const [currH, currM] = currentTime.split(':').map(Number);
+
+      const scheduledStartMinutes = schedH * 60 + schedM;
+      const scheduledEndMinutes = endH * 60 + endM;
+      const currentMinutes = currH * 60 + currM;
+
+      // Permitir marcar 30 minutos antes de la clase
+      const canMarkNow = currentMinutes >= (scheduledStartMinutes - 30) &&
+        currentMinutes <= scheduledEndMinutes;
 
       let canCheckIn = false;
       let canCheckOut = false;
       let status: 'not-started' | 'pending' | 'completed' | 'late' = 'not-started';
       let message = '';
 
-      if (attendance) {
+      if (this.isHoliday) {
+        // Es feriado, no se puede marcar nada
+        status = 'not-started';
+        message = 'Día feriado';
+        canCheckIn = false;
+        canCheckOut = false;
+      } else if (attendance) {
         // Ya tiene asistencia registrada
         if (attendance.checkoutAt) {
+          // Asistencia completada
           status = 'completed';
           message = 'Asistencia completada';
+          canCheckIn = false;
+          canCheckOut = false;
         } else {
+          // Asistencia en curso (solo check-in, sin check-out)
           status = 'pending';
-          message = 'Esperando marcar salida';
-          canCheckOut = true;
+          message = 'En curso - Marcar salida';
+          canCheckIn = false;
+          canCheckOut = true; // Puede marcar salida
+
+          // Mostrar si llegó tarde
+          if (attendance.lateMinutes > 0) {
+            status = 'late';
+            message = `En curso - Llegó ${attendance.lateMinutes} min tarde`;
+          }
         }
       } else {
-        // No tiene asistencia aún
-        if (scheduledStart && currentTime >= scheduledStart) {
+        // No tiene asistencia registrada
+        if (!canMarkNow) {
+          // Aún no es hora de marcar
+          if (currentMinutes < (scheduledStartMinutes - 30)) {
+            status = 'not-started';
+            message = `Clase inicia a las ${scheduledStart.substring(0, 5)}`;
+          } else {
+            // Ya pasó la hora de clase
+            status = 'not-started';
+            message = 'Clase finalizada - No se marcó asistencia';
+          }
+          canCheckIn = false;
+        } else {
+          // Es hora de marcar entrada
+          status = 'not-started';
+          message = 'Marcar entrada';
           canCheckIn = true;
 
-          // Verificar si llegaría tarde
-          const minutesLate = this.calculateMinutesLate(scheduledStart, currentTime);
-          if (minutesLate > 5) {
+          // Advertir si llegaría tarde
+          if (currentMinutes > (scheduledStartMinutes + 5)) {
+            const lateMinutes = currentMinutes - scheduledStartMinutes;
             status = 'late';
-            message = `Llegaría tarde (${minutesLate} min de retraso)`;
-          } else {
-            message = 'Puede marcar entrada';
+            message = `Llegaría tarde (${lateMinutes} min de retraso)`;
           }
-        } else {
-          message = `Clase empieza a las ${scheduledStart}`;
         }
       }
+
+      console.log(`✅ Resultado para ${session.course?.name}:`, {
+        status,
+        message,
+        canCheckIn,
+        canCheckOut
+      });
 
       return {
         session,
@@ -274,8 +433,8 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
   }
 
   private calculateMinutesLate(scheduledStart: string, actualTime: string): number {
-    const [schedH, schedM, schedS] = scheduledStart.split(':').map(Number);
-    const [actualH, actualM, actualS] = actualTime.split(':').map(Number);
+    const [schedH, schedM] = scheduledStart.split(':').map(Number);
+    const [actualH, actualM] = actualTime.split(':').map(Number);
 
     const scheduledMinutes = schedH * 60 + schedM;
     const actualMinutes = actualH * 60 + actualM;
@@ -293,9 +452,25 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
   checkIn(sessionWithAttendance: SessionWithAttendance): void {
     const session = sessionWithAttendance.session;
 
+    // ✅ VALIDACIÓN 1: Verificar que no haya asistencia previa
+    if (sessionWithAttendance.attendance) {
+      this.snackBar.open('Ya existe una asistencia registrada para esta sesión', 'Cerrar', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    // ✅ VALIDACIÓN 2: Verificar que no esté en proceso de check-in
+    if (this.checkingIn === session.uuid) {
+      console.log('⚠️ Ya hay un check-in en proceso para esta sesión');
+      return; // Ya está procesando, no hacer nada
+    }
+
     if (!session.teachingHours || session.teachingHours.length === 0) {
       this.snackBar.open('Error: La sesión no tiene horas pedagógicas', 'Cerrar', {
-        duration: 3000
+        duration: 3000,
+        panelClass: ['error-snackbar']
       });
       return;
     }
@@ -323,10 +498,19 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
       scheduledDurationMinutes: totalMinutes
     };
 
+    console.log('📤 Enviando check-in:', request);
+
     this.attendanceService.checkInWithSchedule(request)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          // ✅ Limpiar el estado de loading SIEMPRE (incluso si hay error)
+          this.checkingIn = null;
+        })
+      )
       .subscribe({
         next: (response) => {
+          console.log('✅ Entrada registrada correctamente');
           const attendance = response.data;
 
           let message = 'Entrada registrada correctamente';
@@ -336,75 +520,104 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
 
           this.snackBar.open(message, 'Cerrar', {
             duration: 5000,
-            panelClass: attendance.lateMinutes > 0 ? ['warn-snackbar'] : ['success-snackbar']
+            panelClass: attendance.lateMinutes > 0 ? ['warning-snackbar'] : ['success-snackbar']
           });
 
-          this.checkingIn = null;
+          // Recargar datos
           this.loadTodayData();
         },
         error: (error) => {
-          console.error('Error en check-in:', error);
-          this.snackBar.open(
-            error.error?.message || 'Error al registrar entrada',
-            'Cerrar',
-            { duration: 3000 }
-          );
-          this.checkingIn = null;
+          console.error('❌ Error al marcar entrada:', error);
+
+          // Mostrar mensaje de error del backend si existe
+          const errorMessage = error.error?.message || 'Error al marcar entrada';
+
+          this.snackBar.open(errorMessage, 'Cerrar', {
+            duration: 5000,
+            panelClass: ['error-snackbar']
+          });
+
+          // Recargar datos para reflejar el estado actual
+          this.loadTodayData();
         }
       });
   }
 
   checkOut(sessionWithAttendance: SessionWithAttendance): void {
-    if (!sessionWithAttendance.attendance) {
+    const attendance = sessionWithAttendance.attendance;
+
+    if (!attendance) {
+      this.snackBar.open('Error: No hay registro de entrada', 'Cerrar', {
+        duration: 3000
+      });
       return;
     }
 
-    const attendanceUuid = sessionWithAttendance.attendance.uuid;
-    this.checkingOut = attendanceUuid;
+    this.checkingOut = attendance.uuid;
 
-    this.attendanceService.checkOut(attendanceUuid)
-      .pipe(takeUntil(this.destroy$))
+    console.log('📤 Enviando check-out para:', attendance.uuid);
+
+    this.attendanceService.checkOut(attendance.uuid)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.checkingOut = null)
+      )
       .subscribe({
         next: (response) => {
-          const attendance = response.data;
+          const updated = response.data;
 
           let message = 'Salida registrada correctamente';
-          if (attendance.earlyDepartureMinutes > 0) {
-            message = `Salida registrada. Salida anticipada: ${attendance.earlyDepartureMinutes} min`;
+          if (updated.earlyDepartureMinutes > 0) {
+            message = `Salida registrada con ${updated.earlyDepartureMinutes} min de salida anticipada`;
           }
 
           this.snackBar.open(message, 'Cerrar', {
             duration: 5000,
-            panelClass: attendance.earlyDepartureMinutes > 0 ? ['warn-snackbar'] : ['success-snackbar']
+            panelClass: updated.earlyDepartureMinutes > 0 ? ['warning-snackbar'] : ['success-snackbar']
           });
 
-          this.checkingOut = null;
+          // Recargar datos
           this.loadTodayData();
         },
         error: (error) => {
-          console.error('Error en check-out:', error);
-          this.snackBar.open(
-            error.error?.message || 'Error al registrar salida',
-            'Cerrar',
-            { duration: 3000 }
-          );
-          this.checkingOut = null;
+          console.error('❌ Error al marcar salida:', error);
+          this.snackBar.open('Error al marcar salida', 'Cerrar', {
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
         }
       });
   }
 
-  // ==================== UTILIDADES PARA TEMPLATE ====================
+  // ==================== UTILIDADES PARA EL TEMPLATE ====================
 
+  /**
+   * ✅ Refresca los datos del día actual
+   */
+  refreshData(): void {
+    console.log('🔄 Refrescando datos...');
+    this.loadTodayData();
+  }
+
+  /**
+   * ✅ Obtiene el título de la sesión (nombre del curso)
+   */
   getSessionTitle(session: ClassSessionResponse): string {
     return session.course?.name || 'Sin curso';
   }
 
+  /**
+   * ✅ Obtiene el subtítulo de la sesión (grupo + ambiente)
+   */
   getSessionSubtitle(session: ClassSessionResponse): string {
     const group = session.studentGroup?.name || '';
     const space = session.learningSpace?.name || '';
     return `${group} - ${space}`;
   }
 
+  /**
+   * ✅ Obtiene el horario de la sesión (hora inicio - hora fin)
+   */
   getSessionTime(session: ClassSessionResponse): string {
     if (!session.teachingHours || session.teachingHours.length === 0) {
       return 'Sin horario';
@@ -414,6 +627,9 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
     return `${firstHour.startTime.substring(0, 5)} - ${lastHour.endTime.substring(0, 5)}`;
   }
 
+  /**
+   * ✅ Obtiene el color del chip según el estado
+   */
   getStatusChipColor(status: string): string {
     const colors: Record<string, string> = {
       'not-started': 'primary',
@@ -425,18 +641,57 @@ export class TeacherAttendanceDashboardComponent implements OnInit, OnDestroy {
   }
 
   getCompletedCount(): number {
-    return this.todaySessions.filter(s => s.status === 'completed').length;
+    return this.todaySessions.filter(item => item.status === 'completed').length;
   }
 
   getPendingCount(): number {
-    return this.todaySessions.filter(s => s.status === 'pending').length;
+    return this.todaySessions.filter(item => item.status === 'pending').length;
   }
 
   getNotStartedCount(): number {
-    return this.todaySessions.filter(s => s.status === 'not-started').length;
+    return this.todaySessions.filter(item => item.status === 'not-started').length;
   }
 
-  refreshData(): void {
-    this.loadTodayData();
+  formatTime(time?: string): string {
+    if (!time) return '--:--';
+    return time.substring(0, 5); // HH:mm
+  }
+
+  formatDateTime(dateTime?: string): string {
+    if (!dateTime) return '--:--';
+    const date = new Date(dateTime);
+    return date.toLocaleTimeString('es-PE', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  getStatusChipClass(status: string): string {
+    const classes: Record<string, string> = {
+      'not-started': 'status-not-started',
+      'pending': 'status-pending',
+      'completed': 'status-completed',
+      'late': 'status-late'
+    };
+    return classes[status] || '';
+  }
+
+  getCourseDisplayName(session: ClassSessionResponse): string {
+    return session.course?.name || 'Sin nombre';
+  }
+
+  getGroupDisplayName(session: ClassSessionResponse): string {
+    return session.studentGroup?.name || 'Sin grupo';
+  }
+
+  getSessionTimeRange(session: ClassSessionResponse): string {
+    if (!session.teachingHours || session.teachingHours.length === 0) {
+      return '--:-- - --:--';
+    }
+
+    const firstHour = session.teachingHours[0];
+    const lastHour = session.teachingHours[session.teachingHours.length - 1];
+
+    return `${this.formatTime(firstHour.startTime)} - ${this.formatTime(lastHour.endTime)}`;
   }
 }

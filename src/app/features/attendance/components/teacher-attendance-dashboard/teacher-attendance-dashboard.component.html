@@ -126,7 +126,7 @@
                 [disabled]="checkingIn === item.session.uuid || isHoliday">
                 <mat-spinner diameter="20" *ngIf="checkingIn === item.session.uuid"></mat-spinner>
                 <mat-icon *ngIf="checkingIn !== item.session.uuid">login</mat-icon>
-                {{ checkingIn === item.session.uuid ? 'Registrando...' : 'Marcar Entrada' }}
+                {{ checkingIn === item.session.uuid ? 'Marcando...' : 'Marcar Entrada' }}
               </button>
 
               <!-- Botón Check-out -->
@@ -135,10 +135,10 @@
                 color="accent"
                 *ngIf="item.canCheckOut"
                 (click)="checkOut(item)"
-                [disabled]="checkingOut === item.attendance?.uuid">
+                [disabled]="checkingOut === item.attendance?.uuid || isHoliday">
                 <mat-spinner diameter="20" *ngIf="checkingOut === item.attendance?.uuid"></mat-spinner>
                 <mat-icon *ngIf="checkingOut !== item.attendance?.uuid">logout</mat-icon>
-                {{ checkingOut === item.attendance?.uuid ? 'Registrando...' : 'Marcar Salida' }}
+                {{ checkingOut === item.attendance?.uuid ? 'Marcando...' : 'Marcar Salida' }}
               </button>
 
               <!-- Estado completado -->

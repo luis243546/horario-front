@@ -51,6 +51,15 @@ export class PeriodService {
     return this.http.get<PeriodResponse>(this.apiUrl);
   }
 
+  // ✅ NUEVO: Obtener el período activo (basado en fechas)
+  getActivePeriod(): Observable<PeriodResponse> {
+    return this.http.get<PeriodResponse>(`${this.apiUrl}/active`).pipe(
+      tap(response => {
+        console.log('📅 Active period fetched:', response.data);
+      })
+    );
+  }
+
   // Obtener un periodo por ID
   getPeriodById(uuid: string): Observable<PeriodResponse> {
     return this.http.get<PeriodResponse>(`${this.apiUrl}/${uuid}`);
