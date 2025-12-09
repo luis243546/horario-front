@@ -447,7 +447,7 @@ interface SidebarItem {
 export class DashboardLayoutComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private breakpointObserver = inject(BreakpointObserver);
-  public authService = inject(AuthService); // Hacer público para usar en template
+  public authService = inject(AuthService);
   private userInfoService = inject(UserInfoService);
   private notificationService = inject(NotificationService);
   private periodService = inject(PeriodService);

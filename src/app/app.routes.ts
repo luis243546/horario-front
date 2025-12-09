@@ -79,6 +79,15 @@ export const routes: Routes = [
         loadChildren: () => import('./features/attendance/attendance.routes')
           .then(m => m.ATTENDANCE_ROUTES),
         data: { roles: ['TEACHER'] } // Solo para docentes
+      },
+      {
+        path: 'nomina',
+        loadChildren: () => import('./features/payroll-management/payroll.routes')
+          .then(m => m.PAYROLL_ROUTES),
+        canActivate: [AuthGuard],
+        data: {
+          roles: ['COORDINATOR', 'ASSISTANT', 'ACCOUNTANT']
+        }
       }
     ]
   },

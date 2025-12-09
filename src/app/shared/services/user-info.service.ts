@@ -178,12 +178,41 @@ export class UserInfoService extends BaseApiService {
 
   // === MÉTODOS PRIVADOS ===
 
+  // private extractNameFromEmail(email: string): string {
+  //   if (!email) return 'Usuario';
+  //
+  //   const localPart = email.split('@')[0];
+  //   const nameParts = localPart.split('.');
+  //
+  //   return nameParts
+  //     .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+  //     .join(' ');
+  // }
+
   private extractNameFromEmail(email: string): string {
     if (!email) return 'Usuario';
 
     const localPart = email.split('@')[0];
-    const nameParts = localPart.split('.');
 
+    // ✅ Lista de emails genéricos del sistema
+    const genericEmails = [
+      'accountant',
+      'admin',
+      'administrator',
+      'coordinator',
+      'asistente',
+      'contador',
+      'teacher',
+      'docente'
+    ];
+
+    // ✅ Si es un email genérico, retornar el nombre del rol
+    if (genericEmails.includes(localPart.toLowerCase())) {
+      return this.authService.getRoleDisplayName(); // Retorna "Contador", "Administrador", etc.
+    }
+
+    // Para emails con nombre real (ejemplo: juan.perez@example.com)
+    const nameParts = localPart.split('.');
     return nameParts
       .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
       .join(' ');
