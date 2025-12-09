@@ -155,15 +155,15 @@
           <div class="calculation-details">
             <div class="calc-row">
               <span>Por hora pedagógica (45 min):</span>
-              <span class="amount">S/. {{ ratePerHour.value | number:'1.2-2' }}</span>
+              <span class="amount">S/. {{ ratePerHour?.value | number:'1.2-2' }}</span>
             </div>
             <div class="calc-row">
               <span>Por minuto:</span>
-              <span class="amount">S/. {{ (ratePerHour.value / 45) | number:'1.4-4' }}</span>
+              <span class="amount">S/. {{ (ratePerHour?.value / 45) | number:'1.4-4' }}</span>
             </div>
             <div class="calc-row">
               <span>Por hora cronológica (60 min):</span>
-              <span class="amount">S/. {{ (ratePerHour.value * 60 / 45) | number:'1.2-2' }}</span>
+              <span class="amount">S/. {{ (ratePerHour?.value * 60 / 45) | number:'1.2-2' }}</span>
             </div>
           </div>
         </div>
