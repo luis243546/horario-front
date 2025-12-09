@@ -1,0 +1,173 @@
+<div class="rate-management-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">
+        <mat-icon>attach_money</mat-icon>
+        Gestión de Tarifas
+      </h1>
+      <p class="subtitle">Configura las tarifas de pago por hora pedagógica</p>
+    </div>
+  </div>
+
+  <!-- Info Card -->
+  <mat-card class="info-card">
+    <mat-card-content>
+      <div class="info-grid">
+        <div class="info-item">
+          <mat-icon class="info-icon priority">priority_high</mat-icon>
+          <div class="info-text">
+            <strong>Jerarquía de Tarifas:</strong>
+            <span>1° Docente específico → 2° Modalidad educativa → 3° Tarifa por defecto</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <mat-icon class="info-icon schedule">schedule</mat-icon>
+          <div class="info-text">
+            <strong>Hora Pedagógica:</strong>
+            <span>45 minutos (configurable en el sistema)</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <mat-icon class="info-icon history">history</mat-icon>
+          <div class="info-text">
+            <strong>Historial:</strong>
+            <span>Todas las tarifas mantienen un historial de versiones</span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Tabs Container -->
+  <mat-card class="tabs-card">
+    <mat-tab-group
+      [(selectedIndex)]="selectedTabIndex"
+      (selectedIndexChange)="onTabChange($event)"
+      animationDuration="300ms">
+
+      <!-- Teacher Rates Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">person</mat-icon>
+          <span>Por Docente</span>
+        </ng-template>
+        <div class="tab-content">
+          <app-teacher-rate-list></app-teacher-rate-list>
+        </div>
+      </mat-tab>
+
+      <!-- Modality Rates Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">school</mat-icon>
+          <span>Por Modalidad</span>
+        </ng-template>
+        <div class="tab-content">
+          <app-modality-rate-list></app-modality-rate-list>
+        </div>
+      </mat-tab>
+
+      <!-- Default Rates Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">settings</mat-icon>
+          <span>Por Defecto</span>
+        </ng-template>
+        <div class="tab-content">
+          <app-default-rate-list></app-default-rate-list>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+
+  <!-- Help Section -->
+  <mat-card class="help-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>help_outline</mat-icon>
+      <mat-card-title>¿Cómo funcionan las tarifas?</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="help-content">
+        <div class="help-section">
+          <h3>
+            <mat-icon>looks_one</mat-icon>
+            Tarifas por Docente
+          </h3>
+          <p>
+            Define tarifas específicas para cada docente y tipo de actividad. Estas tienen la
+            <strong>mayor prioridad</strong> al calcular pagos. Ideal para docentes con contratos especiales.
+          </p>
+          <p class="example">
+            <strong>Ejemplo:</strong> El profesor Juan Pérez cobra S/. 60 por hora de clase regular,
+            pero S/. 80 por talleres especiales.
+          </p>
+        </div>
+
+        <div class="help-section">
+          <h3>
+            <mat-icon>looks_two</mat-icon>
+            Tarifas por Modalidad
+          </h3>
+          <p>
+            Establece tarifas según la modalidad educativa (Instituto o Escuela Superior).
+            Se aplican cuando no existe una tarifa específica del docente, pero
+            <strong>solo para clases regulares</strong>.
+          </p>
+          <p class="example">
+            <strong>Ejemplo:</strong> En Instituto se paga S/. 45/hora, pero en Escuela Superior
+            se paga S/. 55/hora por clase regular.
+          </p>
+        </div>
+
+        <div class="help-section">
+          <h3>
+            <mat-icon>looks_3</mat-icon>
+            Tarifas por Defecto
+          </h3>
+          <p>
+            Son las tarifas base para todos los tipos de actividad. Se usan cuando no existe
+            una tarifa específica del docente ni de modalidad. <strong>Siempre debe existir</strong>
+            una tarifa por defecto para cada tipo de actividad.
+          </p>
+          <p class="example">
+            <strong>Ejemplo:</strong> Clase Regular: S/. 40/hora, Taller: S/. 50/hora,
+            Supervisión de Examen: S/. 35/hora.
+          </p>
+        </div>
+
+        <div class="priority-flow">
+          <h3>
+            <mat-icon>account_tree</mat-icon>
+            Flujo de Prioridad
+          </h3>
+          <div class="flow-diagram">
+            <div class="flow-step">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <strong>¿Tiene tarifa específica el docente?</strong>
+                <span class="step-action">SÍ → Usar tarifa del docente</span>
+              </div>
+            </div>
+            <mat-icon class="flow-arrow">arrow_downward</mat-icon>
+            <div class="flow-step">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <strong>¿Es clase regular y hay tarifa de modalidad?</strong>
+                <span class="step-action">SÍ → Usar tarifa de modalidad</span>
+              </div>
+            </div>
+            <mat-icon class="flow-arrow">arrow_downward</mat-icon>
+            <div class="flow-step">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <strong>Usar tarifa por defecto</strong>
+                <span class="step-action">Siempre disponible como fallback</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

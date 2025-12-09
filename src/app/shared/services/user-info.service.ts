@@ -9,7 +9,7 @@ export interface UserInfo {
   uuid: string;
   email: string;
   fullName: string;
-  role: 'COORDINATOR' | 'ASSISTANT' | 'TEACHER';
+  role: 'COORDINATOR' | 'ASSISTANT' | 'TEACHER' | 'ACCOUNTANT';
   roleDisplayName: string;
   active: boolean;
   firstLogin: boolean;

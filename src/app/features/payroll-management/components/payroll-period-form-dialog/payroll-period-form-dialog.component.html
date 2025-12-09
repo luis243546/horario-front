@@ -1,0 +1,67 @@
+<h2 mat-dialog-title>
+  <mat-icon>calendar_month</mat-icon>
+  {{ title }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="periodForm" class="period-form">
+
+    <!-- Period Type -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Tipo de Período</mat-label>
+      <mat-select formControlName="periodType">
+        <mat-option *ngFor="let type of periodTypes" [value]="type.value">
+          {{ type.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Date Range -->
+    <div class="date-range-row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Fecha de Inicio</mat-label>
+        <input matInput [matDatepicker]="startPicker" formControlName="startDate"
+               [min]="minDate" [max]="maxDate">
+        <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+        <mat-error>{{ getErrorMessage('startDate') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Fecha de Fin</mat-label>
+        <input matInput [matDatepicker]="endPicker" formControlName="endDate"
+               [min]="minDate" [max]="maxDate">
+        <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+        <mat-error>{{ getErrorMessage('endDate') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Name (Auto-generated) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre del Período</mat-label>
+      <input matInput formControlName="name">
+      <mat-hint>Se genera automáticamente, pero puedes editarlo</mat-hint>
+      <mat-error>{{ getErrorMessage('name') }}</mat-error>
+    </mat-form-field>
+
+    <!-- Description (Optional) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Descripción (Opcional)</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isSaving">
+    Cancelar
+  </button>
+  <button mat-raised-button color="primary" (click)="onSubmit()"
+          [disabled]="periodForm.invalid || isSaving">
+    <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+    <span *ngIf="!isSaving">{{ submitButtonText }}</span>
+  </button>
+</mat-dialog-actions>
+

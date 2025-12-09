@@ -43,7 +43,7 @@ export interface KnowledgeArea {
   };
 }
 
-export type UserRole = 'COORDINATOR' | 'ASSISTANT' | 'TEACHER';
+export type UserRole = 'COORDINATOR' | 'ASSISTANT' | 'TEACHER' | 'ACCOUNTANT';
 
 export interface AuthState {
   isAuthenticated: boolean;
@@ -62,14 +62,16 @@ export interface TokenPayload {
 export const USER_ROLES = {
   COORDINATOR: 'COORDINATOR',
   ASSISTANT: 'ASSISTANT',
-  TEACHER: 'TEACHER'
+  TEACHER: 'TEACHER',
+  ACCOUNTANT: 'ACCOUNTANT'
 } as const;
 
 // Nombres para mostrar de roles
 export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
   COORDINATOR: 'Coordinador General',
   ASSISTANT: 'Administrador',
-  TEACHER: 'Docente'
+  TEACHER: 'Docente',
+  ACCOUNTANT: 'Contador'
 };
 
 // Permisos por rol
@@ -101,6 +103,20 @@ export const ROLE_PERMISSIONS = {
     canManagePeriods: false,
     canViewReports: false,
     canManageOwnAvailability: true
+  },
+  ACCOUNTANT: {  // ← AGREGAR PERMISOS COMPLETOS
+    canDelete: false,
+    canCreate: false,    // No crea datos base
+    canUpdate: true,     // Puede editar asistencias (override)
+    canRead: true,
+    canManageUsers: false,
+    canManagePeriods: false,
+    canViewReports: true,
+    canViewPayroll: true,         // ✅ Ver nómina
+    canCalculatePayroll: true,    // ✅ Calcular nómina
+    canExportPayroll: true,       // ✅ Exportar reportes
+    canManageRates: true,         // ✅ Gestionar tarifas
+    canOverrideAttendance: true   // ✅ Editar asistencias
   }
 } as const;
 
@@ -130,6 +146,10 @@ export class RoleUtils {
     return role === USER_ROLES.TEACHER;
   }
 
+  static isAccountant(role: UserRole): boolean {
+    return role === USER_ROLES.ACCOUNTANT;
+  }
+
   static getDisplayName(role: UserRole): string {
     return ROLE_DISPLAY_NAMES[role] || 'Usuario';
   }
@@ -138,11 +158,18 @@ export class RoleUtils {
     return Object.values(USER_ROLES) as UserRole[];
   }
 
+  static canViewPayroll(role: UserRole): boolean {
+    return role === USER_ROLES.COORDINATOR ||
+      role === USER_ROLES.ASSISTANT ||
+      role === USER_ROLES.ACCOUNTANT;
+  }
+
   static getRoleIcon(role: UserRole): string {
     const icons = {
       COORDINATOR: 'admin_panel_settings',
       ASSISTANT: 'support_agent',
-      TEACHER: 'school'
+      TEACHER: 'school',
+      ACCOUNTANT: 'account_balance_wallet'
     };
     return icons[role] || 'person';
   }
@@ -151,7 +178,8 @@ export class RoleUtils {
     const colors = {
       COORDINATOR: 'purple',
       ASSISTANT: 'blue',
-      TEACHER: 'green'
+      TEACHER: 'green',
+      ACCOUNTANT: 'orange'
     };
     return colors[role] || 'gray';
   }

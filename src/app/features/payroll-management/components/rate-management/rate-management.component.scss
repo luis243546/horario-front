@@ -1,0 +1,339 @@
+.rate-management-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  .page-header {
+    margin-bottom: 24px;
+
+    .header-content {
+      .title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        color: #333;
+
+        mat-icon {
+          font-size: 32px;
+          width: 32px;
+          height: 32px;
+          color: #4caf50;
+        }
+      }
+
+      .subtitle {
+        font-size: 15px;
+        color: #666;
+        margin: 0;
+      }
+    }
+  }
+
+  .info-card {
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+
+    mat-card-content {
+      padding: 20px !important;
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+
+        .info-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+
+          .info-icon {
+            margin-top: 2px;
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+
+            &.priority {
+              color: #d32f2f;
+            }
+
+            &.schedule {
+              color: #1976d2;
+            }
+
+            &.history {
+              color: #f57c00;
+            }
+          }
+
+          .info-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 14px;
+
+            strong {
+              color: #333;
+              font-weight: 600;
+            }
+
+            span {
+              color: #555;
+              line-height: 1.4;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .tabs-card {
+    margin-bottom: 24px;
+
+    ::ng-deep .mat-mdc-tab-group {
+      .mat-mdc-tab-labels {
+        background-color: #f8f9fa;
+        border-radius: 8px 8px 0 0;
+      }
+
+      .mat-mdc-tab {
+        min-width: 160px;
+
+        .tab-icon {
+          margin-right: 8px;
+          vertical-align: middle;
+        }
+      }
+
+      .mat-mdc-tab-body-wrapper {
+        padding: 0;
+      }
+    }
+
+    .tab-content {
+      padding: 24px;
+      min-height: 400px;
+    }
+  }
+
+  .help-card {
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+
+    mat-card-header {
+      margin-bottom: 20px;
+
+      mat-icon[mat-card-avatar] {
+        background-color: #9c27b0;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        width: 48px;
+        height: 48px;
+      }
+
+      mat-card-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
+      }
+    }
+
+    mat-card-content {
+      .help-content {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+
+        .help-section {
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+          h3 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 12px 0;
+
+            mat-icon {
+              color: #9c27b0;
+              font-size: 28px;
+              width: 28px;
+              height: 28px;
+            }
+          }
+
+          p {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.6;
+            margin: 0 0 12px 0;
+
+            strong {
+              color: #333;
+              font-weight: 600;
+            }
+
+            &.example {
+              background: #f8f9fa;
+              padding: 12px;
+              border-left: 4px solid #9c27b0;
+              border-radius: 4px;
+              font-style: italic;
+              margin-top: 12px;
+
+              strong {
+                color: #9c27b0;
+                font-style: normal;
+              }
+            }
+          }
+        }
+
+        .priority-flow {
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+          h3 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 20px 0;
+
+            mat-icon {
+              color: #1976d2;
+              font-size: 28px;
+              width: 28px;
+              height: 28px;
+            }
+          }
+
+          .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+
+            .flow-step {
+              display: flex;
+              align-items: center;
+              gap: 16px;
+              width: 100%;
+              max-width: 600px;
+              background: #f8f9fa;
+              padding: 16px;
+              border-radius: 8px;
+              border: 2px solid #e0e0e0;
+
+              .step-number {
+                flex-shrink: 0;
+                width: 40px;
+                height: 40px;
+                background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                font-weight: 700;
+              }
+
+              .step-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+
+                strong {
+                  font-size: 15px;
+                  color: #333;
+                }
+
+                .step-action {
+                  font-size: 14px;
+                  color: #1976d2;
+                  font-weight: 600;
+                }
+              }
+            }
+
+            .flow-arrow {
+              color: #1976d2;
+              font-size: 32px;
+              width: 32px;
+              height: 32px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .rate-management-container {
+    padding: 16px;
+
+    .page-header {
+      .header-content .title {
+        font-size: 22px;
+
+        mat-icon {
+          font-size: 26px;
+          width: 26px;
+          height: 26px;
+        }
+      }
+    }
+
+    .info-card mat-card-content .info-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .tabs-card {
+      ::ng-deep .mat-mdc-tab {
+        min-width: 100px;
+        font-size: 13px;
+
+        .tab-icon {
+          display: none;
+        }
+      }
+
+      .tab-content {
+        padding: 16px;
+      }
+    }
+
+    .help-card mat-card-content .help-content {
+      .help-section,
+      .priority-flow {
+        padding: 16px;
+      }
+
+      .priority-flow .flow-diagram .flow-step {
+        flex-direction: column;
+        text-align: center;
+
+        .step-number {
+          margin-bottom: 8px;
+        }
+      }
+    }
+  }
+}

@@ -30,7 +30,7 @@ import { PeriodService, Period } from '../../periods/services/period.service';
 import { NotificationsPanelComponent } from '../../../shared/components/notifications-panel/notifications-panel.component';
 
 // Types para evitar errores de tipado
-type UserRole = 'COORDINATOR' | 'ASSISTANT' | 'TEACHER';
+type UserRole = 'COORDINATOR' | 'ASSISTANT' | 'TEACHER' | 'ACCOUNTANT';
 
 interface SidebarItem {
   title: string;

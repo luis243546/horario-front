@@ -191,7 +191,7 @@ export class AuthService {
   /**
    * Obtiene el rol del usuario - VERSIÓN MEJORADA
    */
-  getUserRole(): 'COORDINATOR' | 'ASSISTANT' | 'TEACHER' | null {
+  getUserRole(): 'COORDINATOR' | 'ASSISTANT' | 'TEACHER' | 'ACCOUNTANT' | null {
     const userInfo = this.getUserInfo();
 
     // ✅ CORREGIDO: Verificación completa para evitar undefined
@@ -212,7 +212,8 @@ export class AuthService {
     const roleVariants = {
       COORDINATOR: ['COORDINATOR', 'ROLE_COORDINATOR', 'coordinador', 'COORDINADOR'],
       ASSISTANT: ['ASSISTANT', 'ROLE_ASSISTANT', 'asistente', 'ASISTENTE', 'administrador', 'ADMINISTRADOR'],
-      TEACHER: ['TEACHER', 'ROLE_TEACHER', 'docente', 'DOCENTE', 'profesor', 'PROFESOR']
+      TEACHER: ['TEACHER', 'ROLE_TEACHER', 'docente', 'DOCENTE', 'profesor', 'PROFESOR'],
+      ACCOUNTANT: ['ACCOUNTANT', 'ROLE_ACCOUNTANT', 'contador', 'CONTADOR']
     };
 
     // Verificar COORDINATOR (mayor jerarquía)
@@ -225,6 +226,11 @@ export class AuthService {
     if (roleVariants.ASSISTANT.some(variant => userInfo.roles!.includes(variant))) {
       console.log('🔍 DEBUG - Rol detectado: ASSISTANT');
       return 'ASSISTANT';
+    }
+
+    if (roleVariants.ACCOUNTANT.some(variant => userInfo.roles!.includes(variant))) {
+      console.log('🔍 DEBUG - Rol detectado: ACCOUNTANT');
+      return 'ACCOUNTANT';
     }
 
     // Verificar TEACHER
@@ -261,7 +267,8 @@ export class AuthService {
     const roleNames: { [key: string]: string } = {
       COORDINATOR: 'Coordinador General',
       ASSISTANT: 'Administrador',
-      TEACHER: 'Docente'
+      TEACHER: 'Docente',
+      ACCOUNTANT: 'Contador'
     };
 
     return roleNames[role || 'TEACHER'] || 'Usuario';
@@ -295,6 +302,18 @@ export class AuthService {
     const result = role === 'COORDINATOR';
     console.log('🔍 DEBUG - canDelete():', result, 'rol actual:', role);
     return result;
+  }
+
+  isAccountant(): boolean {
+    const role = this.getUserRole();
+    const result = role === 'ACCOUNTANT';
+    console.log('🔍 DEBUG - isAccountant():', result, 'rol actual:', role);
+    return result;
+  }
+
+  canViewPayroll(): boolean {
+    const role = this.getUserRole();
+    return role === 'COORDINATOR' || role === 'ASSISTANT' || role === 'ACCOUNTANT';
   }
 
   /**
