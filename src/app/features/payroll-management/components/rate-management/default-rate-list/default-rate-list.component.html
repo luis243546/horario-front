@@ -1,0 +1,194 @@
+<!-- src/app/features/payroll-management/components/rate-management/default-rate-list/default-rate-list.component.html -->
+
+<div class="default-rate-list-container">
+
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="title-section">
+      <h3>
+        <mat-icon>settings</mat-icon>
+        Tarifas Por Defecto
+      </h3>
+      <p class="subtitle">
+        Tarifas base aplicables cuando no existe una tarifa específica de docente ni de modalidad.
+        Actúan como <strong>fallback</strong> en el sistema.
+      </p>
+    </div>
+  </div>
+
+  <!-- Info Box -->
+  <div class="info-box">
+    <mat-icon>info</mat-icon>
+    <div class="info-content">
+      <strong>Prioridad Más Baja</strong>
+      <p>
+        Estas tarifas solo se aplican cuando <strong>no existe</strong> una tarifa específica del docente
+        ni una tarifa de la modalidad educativa. Sirven como respaldo del sistema.
+      </p>
+    </div>
+  </div>
+
+  <!-- Info Box - Coverage -->
+  <div class="info-box coverage-info">
+    <mat-icon>verified</mat-icon>
+    <div class="info-content">
+      <strong>Cobertura Total</strong>
+      <p>
+        Se recomienda mantener al menos una tarifa vigente por cada tipo de actividad
+        para garantizar que todos los pagos puedan calcularse correctamente.
+      </p>
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <mat-card class="table-card">
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="loading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando tarifas por defecto...</p>
+    </div>
+
+    <!-- Table Content -->
+    <div class="table-container" *ngIf="!loading">
+      <table mat-table [dataSource]="dataSource" matSort class="rates-table">
+
+        <!-- Activity Type Column -->
+        <ng-container matColumnDef="activityType">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo de Actividad</th>
+          <td mat-cell *matCellDef="let rate">
+            <div class="activity-cell">
+              <mat-icon [color]="getActivityColor(rate.activityType.code)">
+                {{ getActivityIcon(rate.activityType.code) }}
+              </mat-icon>
+              <span class="activity-name">{{ rate.activityType.name }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Amount Column -->
+        <ng-container matColumnDef="amountPerHour">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Tarifa/Hora</th>
+          <td mat-cell *matCellDef="let rate">
+            <span class="amount">S/. {{ rate.ratePerHour | number:'1.2-2' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Valid From Column -->
+        <ng-container matColumnDef="validFrom">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Vigente Desde</th>
+          <td mat-cell *matCellDef="let rate">
+            {{ rate.effectiveFrom | date:'dd/MM/yyyy' }}
+          </td>
+        </ng-container>
+
+        <!-- Valid Until Column -->
+        <ng-container matColumnDef="validUntil">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Vigente Hasta</th>
+          <td mat-cell *matCellDef="let rate">
+            {{ rate.effectiveTo ? (rate.effectiveTo | date:'dd/MM/yyyy') : 'Indefinida' }}
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let rate">
+            <mat-chip [class]="getStatusClass(rate)">
+              {{ getStatusLabel(rate) }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let rate">
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="menu"
+              [disabled]="loading">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button
+                mat-menu-item
+                (click)="openEditDialog(rate)"
+                [disabled]="!canEdit(rate)">
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="createNewVersion(rate)">
+                <mat-icon>history</mat-icon>
+                <span>Nueva Versión</span>
+              </button>
+              <mat-divider></mat-divider>
+              <button
+                mat-menu-item
+                (click)="closeRate(rate)"
+                [disabled]="!isRateActive(rate)">
+                <mat-icon>event_busy</mat-icon>
+                <span>Cerrar Vigencia</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <!-- Empty State -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="empty-state">
+              <mat-icon>settings_suggest</mat-icon>
+              <p>No hay tarifas por defecto configuradas</p>
+              <p class="warning-text">
+                ⚠️ Se recomienda configurar al menos una tarifa por cada tipo de actividad
+              </p>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Paginator -->
+      <mat-paginator
+        [pageSizeOptions]="[10, 25, 50]"
+        showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </mat-card>
+
+  <!-- Help Section -->
+  <mat-card class="help-card">
+    <h4>
+      <mat-icon>help_outline</mat-icon>
+      Guía Rápida
+    </h4>
+    <div class="help-content">
+      <div class="help-item">
+        <mat-icon>edit</mat-icon>
+        <div>
+          <strong>Editar Tarifa:</strong>
+          <p>Solo se pueden editar tarifas vigentes. Modifica el monto o las fechas de vigencia.</p>
+        </div>
+      </div>
+      <div class="help-item">
+        <mat-icon>history</mat-icon>
+        <div>
+          <strong>Nueva Versión:</strong>
+          <p>Cierra la tarifa actual y crea una nueva vigente desde la fecha seleccionada.</p>
+        </div>
+      </div>
+      <div class="help-item">
+        <mat-icon>event_busy</mat-icon>
+        <div>
+          <strong>Cerrar Vigencia:</strong>
+          <p>Establece la fecha de fin como hoy. La tarifa dejará de aplicarse inmediatamente.</p>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+
+</div>

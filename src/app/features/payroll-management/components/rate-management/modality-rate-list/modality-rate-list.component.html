@@ -1,0 +1,223 @@
+<!-- src/app/features/payroll-management/components/rate-management/modality-rate-list/modality-rate-list.component.html -->
+
+<div class="modality-rate-list-container">
+
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="title-section">
+      <h3>
+        <mat-icon>business</mat-icon>
+        Tarifas por Modalidad Educativa
+      </h3>
+      <p class="subtitle">
+        Gestiona las tarifas base según la modalidad educativa (Instituto o Escuela Superior).
+        Solo aplica para <strong>Clases Regulares</strong>.
+      </p>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="openCreateDialog()"
+      [disabled]="loading">
+      <mat-icon>add</mat-icon>
+      Nueva Tarifa
+    </button>
+  </div>
+
+  <!-- Info Box -->
+  <div class="info-box">
+    <mat-icon>info</mat-icon>
+    <div class="info-content">
+      <strong>Jerarquía de Tarifas</strong>
+      <p>
+        Las tarifas por modalidad solo aplican a <strong>clases regulares del horario</strong>.
+        Si un docente tiene una tarifa específica, esta tiene prioridad sobre la tarifa de modalidad.
+      </p>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <mat-card class="filters-card">
+    <div class="filters-container">
+
+      <!-- Search Input -->
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar modalidad</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Instituto, Escuela...">
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+
+      <!-- Modality Filter -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Modalidad</mat-label>
+        <mat-select
+          [(ngModel)]="selectedModality"
+          (selectionChange)="onModalityChange()">
+          <mat-option value="all">Todas las modalidades</mat-option>
+          <mat-divider></mat-divider>
+          <mat-option *ngFor="let modality of modalities" [value]="modality.uuid">
+            <div class="modality-option">
+              <mat-icon [color]="getModalityColor(modality.name)">
+                {{ getModalityIcon(modality.name) }}
+              </mat-icon>
+              <span>{{ modality.name }}</span>
+              <span class="duration-badge">{{ modality.durationYears }} años</span>
+            </div>
+          </mat-option>
+        </mat-select>
+        <mat-icon matPrefix>filter_list</mat-icon>
+      </mat-form-field>
+
+      <!-- Active Filter Chips -->
+      <div class="status-chips">
+        <mat-chip-listbox>
+          <mat-chip-option
+            [selected]="showActiveOnly"
+            (click)="toggleActiveFilter()">
+            <mat-icon>{{ showActiveOnly ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            Solo Vigentes
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+
+    </div>
+  </mat-card>
+
+  <!-- Table Section -->
+  <mat-card class="table-card">
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="loading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando tarifas...</p>
+    </div>
+
+    <!-- Table Content -->
+    <div class="table-container" *ngIf="!loading">
+      <table mat-table [dataSource]="dataSource" matSort class="rates-table">
+
+        <!-- Modality Column -->
+        <ng-container matColumnDef="modality">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Modalidad Educativa</th>
+          <td mat-cell *matCellDef="let rate">
+            <div class="modality-cell">
+              <mat-icon [color]="getModalityColor(rate.modality.name)">
+                {{ getModalityIcon(rate.modality.name) }}
+              </mat-icon>
+              <div class="modality-info">
+                <span class="modality-name">{{ rate.modality.name }}</span>
+                <span class="modality-duration">{{ rate.modality.durationYears }} años</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Amount Column -->
+        <ng-container matColumnDef="amountPerHour">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Tarifa/Hora</th>
+          <td mat-cell *matCellDef="let rate">
+            <span class="amount">S/. {{ rate.ratePerHour | number:'1.2-2' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Valid From Column -->
+        <ng-container matColumnDef="validFrom">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Vigente Desde</th>
+          <td mat-cell *matCellDef="let rate">
+            {{ rate.effectiveFrom | date:'dd/MM/yyyy' }}
+          </td>
+        </ng-container>
+
+        <!-- Valid Until Column -->
+        <ng-container matColumnDef="validUntil">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Vigente Hasta</th>
+          <td mat-cell *matCellDef="let rate">
+            {{ rate.effectiveTo ? (rate.effectiveTo | date:'dd/MM/yyyy') : 'Indefinida' }}
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let rate">
+            <mat-chip [class]="getStatusClass(rate)">
+              {{ getStatusLabel(rate) }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let rate">
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="menu"
+              [disabled]="loading">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button
+                mat-menu-item
+                (click)="openEditDialog(rate)"
+                [disabled]="!canEdit(rate)">
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="createNewVersion(rate)">
+                <mat-icon>history</mat-icon>
+                <span>Nueva Versión</span>
+              </button>
+              <mat-divider></mat-divider>
+              <button
+                mat-menu-item
+                (click)="closeRate(rate)"
+                [disabled]="!isRateActive(rate)">
+                <mat-icon>event_busy</mat-icon>
+                <span>Cerrar Vigencia</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="deleteRate(rate)"
+                [disabled]="!canDelete(rate)"
+                class="delete-action">
+                <mat-icon>delete</mat-icon>
+                <span>Eliminar</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <!-- Empty State -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="empty-state">
+              <mat-icon>search_off</mat-icon>
+              <p>No se encontraron tarifas por modalidad</p>
+              <button mat-stroked-button color="primary" (click)="openCreateDialog()">
+                <mat-icon>add</mat-icon>
+                Crear Primera Tarifa
+              </button>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Paginator -->
+      <mat-paginator
+        [pageSizeOptions]="[10, 25, 50, 100]"
+        showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </mat-card>
+
+</div>

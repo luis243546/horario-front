@@ -1,0 +1,197 @@
+<!-- src/app/features/payroll-management/components/rate-management/teacher-rate-form-dialog/teacher-rate-form-dialog.component.html -->
+
+<div class="dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>{{ data.mode === 'create' ? 'add_circle' : data.mode === 'edit' ? 'edit' : 'history' }}</mat-icon>
+      {{ getTitle() }}
+    </h2>
+    <button mat-icon-button (click)="onCancel()" [disabled]="loading">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <mat-dialog-content>
+    <form [formGroup]="form" class="rate-form">
+
+      <!-- Teacher Selection -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Docente</mat-label>
+          <input
+            type="text"
+            matInput
+            formControlName="teacherSearch"
+            [matAutocomplete]="autoTeacher"
+            placeholder="Buscar docente..."
+            [disabled]="data.mode === 'edit' || data.mode === 'new-version'">
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-autocomplete
+            #autoTeacher="matAutocomplete"
+            [displayWith]="displayTeacher"
+            (optionSelected)="onTeacherSelected($event.option.value)">
+            <mat-option *ngFor="let teacher of filteredTeachers$ | async" [value]="teacher">
+              <div class="teacher-option">
+                <span class="teacher-name">{{ teacher.fullName }}</span>
+                <span class="teacher-email" *ngIf="teacher.email">{{ teacher.email }}</span>
+              </div>
+            </mat-option>
+          </mat-autocomplete>
+          <mat-error *ngIf="teacherUuid?.hasError('required')">
+            El docente es obligatorio
+          </mat-error>
+          <mat-hint *ngIf="data.mode !== 'create'">
+            No se puede cambiar el docente al editar
+          </mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- Activity Type -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Tipo de Actividad</mat-label>
+          <mat-select
+            formControlName="activityTypeUuid"
+            [disabled]="data.mode === 'edit' || data.mode === 'new-version'">
+            <mat-option *ngFor="let type of activityTypes" [value]="type.uuid">
+              <div class="activity-type-option">
+                <mat-icon>{{ getActivityIcon(type.code) }}</mat-icon>
+                <span>{{ type.name }}</span>
+              </div>
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>category</mat-icon>
+          <mat-error *ngIf="activityTypeUuid?.hasError('required')">
+            El tipo de actividad es obligatorio
+          </mat-error>
+          <mat-hint *ngIf="data.mode !== 'create'">
+            No se puede cambiar el tipo al editar
+          </mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- Rate Per Hour -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Tarifa por Hora Pedagógica (45 min)</mat-label>
+          <input
+            type="number"
+            matInput
+            formControlName="ratePerHour"
+            placeholder="0.00"
+            step="0.01"
+            min="0.01">
+          <span matPrefix>S/.&nbsp;</span>
+          <mat-icon matSuffix>payments</mat-icon>
+          <mat-error *ngIf="ratePerHour?.hasError('required')">
+            La tarifa es obligatoria
+          </mat-error>
+          <mat-error *ngIf="ratePerHour?.hasError('min')">
+            La tarifa debe ser mayor a 0
+          </mat-error>
+          <mat-hint>
+            Monto en soles peruanos (PEN)
+          </mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- Date Range -->
+      <div class="form-row date-range">
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Vigente Desde</mat-label>
+          <input
+            matInput
+            [matDatepicker]="pickerFrom"
+            formControlName="effectiveFrom"
+            [min]="minDate"
+            [max]="maxDate"
+            placeholder="dd/mm/yyyy">
+          <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFrom></mat-datepicker>
+          <mat-error *ngIf="effectiveFrom?.hasError('required')">
+            La fecha de inicio es obligatoria
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Vigente Hasta (Opcional)</mat-label>
+          <input
+            matInput
+            [matDatepicker]="pickerTo"
+            formControlName="effectiveTo"
+            [min]="effectiveFrom?.value || minDate"
+            [max]="maxDate"
+            placeholder="dd/mm/yyyy">
+          <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+          <mat-datepicker #pickerTo></mat-datepicker>
+          <mat-hint>Dejar vacío para vigencia indefinida</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- Date Range Error -->
+      <div class="form-row" *ngIf="hasDateRangeError">
+        <div class="error-message">
+          <mat-icon>error</mat-icon>
+          La fecha de fin debe ser posterior a la fecha de inicio
+        </div>
+      </div>
+
+      <!-- Info Box for New Version -->
+      <div class="info-box" *ngIf="data.mode === 'new-version'">
+        <mat-icon>info</mat-icon>
+        <div class="info-content">
+          <strong>Nueva Versión</strong>
+          <p>Se cerrará la tarifa actual y se creará una nueva versión vigente desde la fecha seleccionada.</p>
+        </div>
+      </div>
+
+      <!-- Info Box for Rate Calculation -->
+      <div class="info-box calculation-info" *ngIf="ratePerHour?.value">
+        <mat-icon>calculate</mat-icon>
+        <div class="info-content">
+          <strong>Cálculo de Tarifas</strong>
+          <div class="calculation-details">
+            <div class="calc-row">
+              <span>Por hora pedagógica (45 min):</span>
+              <span class="amount">S/. {{ ratePerHour.value | number:'1.2-2' }}</span>
+            </div>
+            <div class="calc-row">
+              <span>Por minuto:</span>
+              <span class="amount">S/. {{ (ratePerHour.value / 45) | number:'1.4-4' }}</span>
+            </div>
+            <div class="calc-row">
+              <span>Por hora cronológica (60 min):</span>
+              <span class="amount">S/. {{ (ratePerHour.value * 60 / 45) | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </form>
+
+    <!-- Loading Spinner -->
+    <div class="loading-overlay" *ngIf="loading">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  </mat-dialog-content>
+
+  <!-- Actions -->
+  <mat-dialog-actions align="end">
+    <button
+      mat-button
+      (click)="onCancel()"
+      [disabled]="loading">
+      Cancelar
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="form.invalid || loading">
+      <mat-icon>{{ data.mode === 'create' ? 'save' : 'update' }}</mat-icon>
+      {{ getSubmitButtonText() }}
+    </button>
+  </mat-dialog-actions>
+</div>

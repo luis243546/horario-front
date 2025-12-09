@@ -1,0 +1,314 @@
+<!-- src/app/features/payroll-management/components/payroll-dashboard/payroll-dashboard.component.html -->
+
+<div class="payroll-dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1 class="title">
+        <mat-icon>payments</mat-icon>
+        Dashboard de Nómina
+      </h1>
+      <p class="subtitle">Gestión y control de pagos a docentes</p>
+    </div>
+
+    <!-- Period Selector -->
+    <mat-form-field appearance="outline" class="period-selector" *ngIf="periods.length > 0">
+      <mat-label>Período</mat-label>
+      <mat-select [(value)]="selectedPeriod" (selectionChange)="onPeriodChange($event.value)">
+        <mat-option *ngFor="let period of periods" [value]="period">
+          <div class="period-option">
+            <span class="period-name">{{ period.name }}</span>
+            <mat-chip *ngIf="period.isCalculated" class="calculated-chip">
+              Calculado
+            </mat-chip>
+          </div>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando datos del dashboard...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading" class="dashboard-content">
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <!-- Total Docentes -->
+      <mat-card class="stat-card teachers">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>people</mat-icon>
+          </div>
+          <div class="stat-data">
+            <span class="stat-label">Docentes</span>
+            <span class="stat-value">{{ stats.totalTeachers }}</span>
+            <span class="stat-subtitle">
+              {{ stats.calculatedLines }} con nómina calculada
+            </span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Monto Bruto -->
+      <mat-card class="stat-card gross">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>account_balance_wallet</mat-icon>
+          </div>
+          <div class="stat-data">
+            <span class="stat-label">Monto Bruto</span>
+            <span class="stat-value">{{ formatCurrency(stats.totalGrossAmount) }}</span>
+            <span class="stat-subtitle">Total antes de descuentos</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Penalizaciones -->
+      <mat-card class="stat-card penalties">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>remove_circle</mat-icon>
+          </div>
+          <div class="stat-data">
+            <span class="stat-label">Penalizaciones</span>
+            <span class="stat-value penalty">{{ formatCurrency(stats.totalPenalties) }}</span>
+            <span class="stat-subtitle">Por tardanzas y faltas</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Monto Neto -->
+      <mat-card class="stat-card net">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>paid</mat-icon>
+          </div>
+          <div class="stat-data">
+            <span class="stat-label">Monto Neto</span>
+            <span class="stat-value net">{{ formatCurrency(stats.totalNetAmount) }}</span>
+            <span class="stat-subtitle">Total a pagar</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Cumplimiento -->
+      <mat-card class="stat-card compliance">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>trending_up</mat-icon>
+          </div>
+          <div class="stat-data">
+            <span class="stat-label">Cumplimiento</span>
+            <span class="stat-value">{{ formatPercentage(stats.averageCompliance) }}</span>
+            <span class="stat-subtitle">Promedio general</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Asistencias Pendientes -->
+      <mat-card class="stat-card pending"
+                [class.has-pending]="stats.pendingAttendances > 0"
+                (click)="navigateTo('attendance-override')"
+                style="cursor: pointer;">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon [matBadge]="stats.pendingAttendances"
+                      matBadgeColor="warn"
+                      [matBadgeHidden]="stats.pendingAttendances === 0">
+              schedule
+            </mat-icon>
+          </div>
+          <div class="stat-data">
+            <span class="stat-label">Pendientes</span>
+            <span class="stat-value">{{ stats.pendingAttendances }}</span>
+            <span class="stat-subtitle">
+              Asistencias por aprobar
+              <mat-icon class="action-icon">arrow_forward</mat-icon>
+            </span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Quick Actions -->
+    <mat-card class="quick-actions-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>bolt</mat-icon>
+          Acciones Rápidas
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="actions-grid">
+          <button mat-raised-button color="primary" (click)="navigateTo('calculation')">
+            <mat-icon>calculate</mat-icon>
+            Calcular Nómina
+          </button>
+          <button mat-raised-button color="accent" (click)="navigateTo('periods')">
+            <mat-icon>calendar_month</mat-icon>
+            Gestionar Períodos
+          </button>
+          <button mat-raised-button (click)="navigateTo('rates')">
+            <mat-icon>attach_money</mat-icon>
+            Configurar Tarifas
+          </button>
+          <button mat-raised-button (click)="navigateTo('extra-assignments')">
+            <mat-icon>add_circle</mat-icon>
+            Actividades Extra
+          </button>
+          <button mat-raised-button (click)="navigateTo('attendance-override')">
+            <mat-icon>edit_calendar</mat-icon>
+            Gestionar Asistencias
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Two Column Layout -->
+    <div class="two-column-layout">
+
+      <!-- Left Column: Top Teachers -->
+      <div class="left-column">
+        <mat-card class="top-teachers-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>emoji_events</mat-icon>
+              Top 5 Docentes - Monto Neto
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div *ngIf="topTeachers.length === 0" class="empty-state">
+              <mat-icon>inbox</mat-icon>
+              <p>No hay nóminas calculadas aún</p>
+            </div>
+
+            <div *ngIf="topTeachers.length > 0" class="teachers-list">
+              <div *ngFor="let line of topTeachers; let i = index" class="teacher-item">
+                <div class="teacher-rank">
+                  <span class="rank-number" [class.top-3]="i < 3">{{ i + 1 }}</span>
+                </div>
+                <div class="teacher-info">
+                  <span class="teacher-name">{{ line.teacher.fullName }}</span>
+                  <span class="teacher-dept">{{ line.teacher.department.name }}</span>
+                </div>
+                <div class="teacher-stats">
+                  <span class="teacher-amount">{{ formatCurrency(line.netAmount) }}</span>
+                  <span class="teacher-compliance"
+                        [class]="getComplianceColor(line.compliancePercentage)">
+                    {{ formatPercentage(line.compliancePercentage) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Right Column: Recent Activity + Pending Attendances -->
+      <div class="right-column">
+
+        <!-- Recent Activity -->
+        <mat-card class="recent-activity-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>history</mat-icon>
+              Actividad Reciente
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div *ngIf="recentActivities.length === 0" class="empty-state">
+              <mat-icon>timeline</mat-icon>
+              <p>No hay actividad reciente</p>
+            </div>
+
+            <div *ngIf="recentActivities.length > 0" class="activity-list">
+              <div *ngFor="let activity of recentActivities" class="activity-item">
+                <div class="activity-icon" [class]="activity.color">
+                  <mat-icon>{{ activity.icon }}</mat-icon>
+                </div>
+                <div class="activity-content">
+                  <span class="activity-message">{{ activity.message }}</span>
+                  <span class="activity-time">{{ formatTimeAgo(activity.timestamp) }}</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Pending Attendances Preview -->
+        <mat-card class="pending-attendances-card" *ngIf="stats.pendingAttendances > 0">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon [matBadge]="stats.pendingAttendances" matBadgeColor="warn">
+                pending_actions
+              </mat-icon>
+              Asistencias Pendientes
+            </mat-card-title>
+            <button mat-button color="primary" (click)="navigateTo('attendance-override')">
+              Ver Todas
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="pending-list">
+              <div *ngFor="let attendance of pendingAttendances.slice(0, 5)" class="pending-item">
+                <mat-icon class="pending-icon">person</mat-icon>
+                <div class="pending-info">
+                  <span class="pending-teacher">{{ attendance.teacher.fullName }}</span>
+                  <span class="pending-date">{{ attendance.attendanceDate | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <mat-chip class="status-chip warn">Pendiente</mat-chip>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Period Info Card (if selected) -->
+    <mat-card class="period-info-card" *ngIf="selectedPeriod">
+      <mat-card-content>
+        <div class="period-info-grid">
+          <div class="info-item">
+            <mat-icon>calendar_today</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Período</span>
+              <span class="info-value">{{ selectedPeriod.name }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <mat-icon>date_range</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Rango de Fechas</span>
+              <span class="info-value">
+                {{ selectedPeriod.startDate | date:'dd/MM/yyyy' }} -
+                {{ selectedPeriod.endDate | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+          </div>
+          <div class="info-item">
+            <mat-icon>category</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Tipo</span>
+              <span class="info-value">{{ selectedPeriod.periodType }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <mat-icon>{{ selectedPeriod.isCalculated ? 'check_circle' : 'pending' }}</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Estado</span>
+              <span class="info-value">
+                {{ selectedPeriod.isCalculated ? 'Calculado' : 'Pendiente' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

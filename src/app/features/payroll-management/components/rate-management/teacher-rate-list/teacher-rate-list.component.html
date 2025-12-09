@@ -1,0 +1,152 @@
+<!-- teacher-rate-list.component.html -->
+<div class="rate-list-content">
+  <!-- Header Actions -->
+  <div class="actions-bar">
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Nueva Tarifa por Docente
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Tipo de Actividad</mat-label>
+      <mat-select [(ngModel)]="selectedActivityType" (selectionChange)="applyFilters()">
+        <mat-option value="all">Todas</mat-option>
+        <mat-option *ngFor="let type of activityTypes" [value]="type.code">
+          {{ type.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar docente</mat-label>
+      <input matInput (keyup)="applySearch($event)" placeholder="Nombre del docente...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <div class="filter-chips">
+      <mat-chip
+        [class.selected]="showActiveOnly"
+        (click)="showActiveOnly = true; applyFilters()">
+        Vigentes
+      </mat-chip>
+      <mat-chip
+        [class.selected]="!showActiveOnly"
+        (click)="showActiveOnly = false; applyFilters()">
+        Todas
+      </mat-chip>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!isLoading" class="table-container">
+    <table mat-table [dataSource]="dataSource" matSort>
+
+      <!-- Teacher Column -->
+      <ng-container matColumnDef="teacher">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Docente</th>
+        <td mat-cell *matCellDef="let rate">
+          <div class="teacher-cell">
+            <span class="teacher-name">{{ rate.teacher.fullName }}</span>
+            <span class="teacher-code">{{ rate.teacher.code }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Activity Type Column -->
+      <ng-container matColumnDef="activityType">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Actividad</th>
+        <td mat-cell *matCellDef="let rate">
+          <mat-chip class="activity-chip">{{ rate.activityType.name }}</mat-chip>
+        </td>
+      </ng-container>
+
+      <!-- Amount Column -->
+      <ng-container matColumnDef="amountPerHour">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Tarifa/Hora</th>
+        <td mat-cell *matCellDef="let rate">
+          <span class="amount">S/. {{ rate.ratePerHour | number:'1.2-2' }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Valid From Column -->
+      <ng-container matColumnDef="validFrom">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Vigente Desde</th>
+        <td mat-cell *matCellDef="let rate">
+          {{ rate.effectiveFrom | date:'dd/MM/yyyy' }}
+        </td>
+      </ng-container>
+
+      <!-- Valid Until Column -->
+      <ng-container matColumnDef="validUntil">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Vigente Hasta</th>
+        <td mat-cell *matCellDef="let rate">
+          {{ rate.effectiveTo ? (rate.effectiveTo | date:'dd/MM/yyyy') : 'Indefinida' }}
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let rate">
+          <mat-chip [class]="getStatusColor(rate)">
+            {{ getStatusText(rate) }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let rate">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="openEditDialog(rate)" [disabled]="!canEdit(rate)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="createNewVersion(rate)">
+              <mat-icon>add_circle</mat-icon>
+              <span>Nueva Versión</span>
+            </button>
+            <button mat-menu-item (click)="closeRate(rate)" [disabled]="!canEdit(rate)">
+              <mat-icon>event_busy</mat-icon>
+              <span>Cerrar Vigencia</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="deleteRate(rate)" [disabled]="!canDelete(rate)" class="delete-action">
+              <mat-icon>delete</mat-icon>
+              <span>Eliminar</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          <div class="no-data">
+            <mat-icon>inbox</mat-icon>
+            <p>No hay tarifas por docente registradas</p>
+            <button mat-raised-button color="primary" (click)="openCreateDialog()">
+              Crear Primera Tarifa
+            </button>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+  </div>
+</div>

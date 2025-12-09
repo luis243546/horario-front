@@ -1,0 +1,645 @@
+.payroll-dashboard-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .header-content {
+      .title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 32px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        color: #333;
+
+        mat-icon {
+          font-size: 36px;
+          width: 36px;
+          height: 36px;
+          color: #1976d2;
+        }
+      }
+
+      .subtitle {
+        font-size: 16px;
+        color: #666;
+        margin: 0;
+      }
+    }
+
+    .period-selector {
+      min-width: 300px;
+    }
+
+    .period-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .period-name {
+        flex: 1;
+        font-weight: 500;
+      }
+
+      .calculated-chip {
+        height: 24px;
+        font-size: 12px;
+      }
+    }
+  }
+
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px;
+
+    p {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #666;
+    }
+  }
+
+  .dashboard-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    // ==================== STATS GRID ====================
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+
+      .stat-card {
+        transition: all 0.3s ease;
+        cursor: default;
+
+        &.pending {
+          &.has-pending {
+            animation: pulse 2s infinite;
+          }
+        }
+
+        &:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        mat-card-content {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          padding: 24px !important;
+
+          .stat-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+
+            mat-icon {
+              font-size: 32px;
+              width: 32px;
+              height: 32px;
+              color: #1976d2;
+            }
+          }
+
+          .stat-data {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+
+            .stat-label {
+              font-size: 14px;
+              color: #666;
+              font-weight: 500;
+              margin-bottom: 4px;
+            }
+
+            .stat-value {
+              font-size: 28px;
+              font-weight: 700;
+              color: #333;
+              line-height: 1.2;
+              margin-bottom: 4px;
+
+              &.penalty {
+                color: #d32f2f;
+              }
+
+              &.net {
+                color: #388e3c;
+              }
+            }
+
+            .stat-subtitle {
+              font-size: 12px;
+              color: #999;
+              display: flex;
+              align-items: center;
+              gap: 4px;
+
+              .action-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+              }
+            }
+          }
+        }
+
+        // Colores específicos por tarjeta
+        &.teachers .stat-icon {
+          background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+          mat-icon { color: #1976d2; }
+        }
+
+        &.gross .stat-icon {
+          background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+          mat-icon { color: #388e3c; }
+        }
+
+        &.penalties .stat-icon {
+          background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+          mat-icon { color: #d32f2f; }
+        }
+
+        &.net .stat-icon {
+          background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+          mat-icon { color: #f57c00; }
+        }
+
+        &.compliance .stat-icon {
+          background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+          mat-icon { color: #7b1fa2; }
+        }
+
+        &.pending .stat-icon {
+          background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
+          mat-icon { color: #f57f17; }
+        }
+      }
+    }
+
+    // ==================== QUICK ACTIONS ====================
+    .quick-actions-card {
+      mat-card-header {
+        mat-card-title {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 20px;
+          font-weight: 600;
+
+          mat-icon {
+            color: #ff9800;
+          }
+        }
+      }
+
+      .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        padding: 16px 0;
+
+        button {
+          height: 56px;
+          font-size: 15px;
+          font-weight: 500;
+
+          mat-icon {
+            margin-right: 8px;
+          }
+        }
+      }
+    }
+
+    // ==================== TWO COLUMN LAYOUT ====================
+    .two-column-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+
+      .left-column,
+      .right-column {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      // Top Teachers Card
+      .top-teachers-card {
+        mat-card-header {
+          mat-card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+
+            mat-icon {
+              color: #ffc107;
+            }
+          }
+        }
+
+        .empty-state {
+          text-align: center;
+          padding: 40px 20px;
+          color: #999;
+
+          mat-icon {
+            font-size: 64px;
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+          }
+        }
+
+        .teachers-list {
+          .teacher-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            transition: background-color 0.2s;
+
+            &:hover {
+              background-color: #f5f5f5;
+            }
+
+            &:not(:last-child) {
+              border-bottom: 1px solid #eee;
+            }
+
+            .teacher-rank {
+              .rank-number {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background-color: #e0e0e0;
+                font-weight: 700;
+                font-size: 16px;
+                color: #666;
+
+                &.top-3 {
+                  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+                  color: #fff;
+                  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+                }
+              }
+            }
+
+            .teacher-info {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+
+              .teacher-name {
+                font-weight: 600;
+                font-size: 15px;
+                color: #333;
+                margin-bottom: 4px;
+              }
+
+              .teacher-dept {
+                font-size: 13px;
+                color: #999;
+              }
+            }
+
+            .teacher-stats {
+              display: flex;
+              flex-direction: column;
+              align-items: flex-end;
+
+              .teacher-amount {
+                font-weight: 700;
+                font-size: 16px;
+                color: #388e3c;
+                margin-bottom: 4px;
+              }
+
+              .teacher-compliance {
+                font-size: 13px;
+                font-weight: 600;
+                padding: 2px 8px;
+                border-radius: 12px;
+
+                &.success {
+                  background-color: #e8f5e9;
+                  color: #2e7d32;
+                }
+
+                &.primary {
+                  background-color: #e3f2fd;
+                  color: #1565c0;
+                }
+
+                &.accent {
+                  background-color: #f3e5f5;
+                  color: #7b1fa2;
+                }
+
+                &.warn {
+                  background-color: #fff3e0;
+                  color: #e65100;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Recent Activity Card
+      .recent-activity-card {
+        mat-card-header {
+          mat-card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+
+            mat-icon {
+              color: #9c27b0;
+            }
+          }
+        }
+
+        .empty-state {
+          text-align: center;
+          padding: 40px 20px;
+          color: #999;
+
+          mat-icon {
+            font-size: 64px;
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+          }
+        }
+
+        .activity-list {
+          .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+
+            &:hover {
+              background-color: #f5f5f5;
+            }
+
+            &:not(:last-child) {
+              border-bottom: 1px solid #eee;
+            }
+
+            .activity-icon {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              flex-shrink: 0;
+
+              mat-icon {
+                font-size: 20px;
+                width: 20px;
+                height: 20px;
+              }
+
+              &.primary {
+                background-color: #e3f2fd;
+                mat-icon { color: #1976d2; }
+              }
+
+              &.warn {
+                background-color: #fff3e0;
+                mat-icon { color: #f57c00; }
+              }
+
+              &.success {
+                background-color: #e8f5e9;
+                mat-icon { color: #388e3c; }
+              }
+            }
+
+            .activity-content {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+
+              .activity-message {
+                font-size: 14px;
+                color: #333;
+                margin-bottom: 4px;
+              }
+
+              .activity-time {
+                font-size: 12px;
+                color: #999;
+              }
+            }
+          }
+        }
+      }
+
+      // Pending Attendances Card
+      .pending-attendances-card {
+        mat-card-header {
+          mat-card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+
+            mat-icon {
+              color: #ff9800;
+            }
+          }
+
+          button {
+            mat-icon {
+              margin-left: 4px;
+            }
+          }
+        }
+
+        .pending-list {
+          .pending-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+
+            &:hover {
+              background-color: #fff3e0;
+            }
+
+            &:not(:last-child) {
+              border-bottom: 1px solid #eee;
+            }
+
+            .pending-icon {
+              color: #ff9800;
+            }
+
+            .pending-info {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+
+              .pending-teacher {
+                font-weight: 600;
+                font-size: 14px;
+                color: #333;
+                margin-bottom: 2px;
+              }
+
+              .pending-date {
+                font-size: 12px;
+                color: #999;
+              }
+            }
+
+            .status-chip {
+              height: 24px;
+              font-size: 12px;
+
+              &.warn {
+                background-color: #fff3e0;
+                color: #e65100;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // ==================== PERIOD INFO CARD ====================
+    .period-info-card {
+      mat-card-content {
+        padding: 24px !important;
+
+        .period-info-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 24px;
+
+          .info-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+
+            mat-icon {
+              font-size: 40px;
+              width: 40px;
+              height: 40px;
+              color: #1976d2;
+            }
+
+            .info-content {
+              display: flex;
+              flex-direction: column;
+
+              .info-label {
+                font-size: 13px;
+                color: #999;
+                margin-bottom: 4px;
+              }
+
+              .info-value {
+                font-size: 16px;
+                font-weight: 600;
+                color: #333;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// ==================== ANIMATIONS ====================
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(255, 152, 0, 0);
+  }
+}
+
+// ==================== RESPONSIVE ====================
+@media (max-width: 1200px) {
+  .payroll-dashboard-container {
+    .dashboard-content {
+      .two-column-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .payroll-dashboard-container {
+    padding: 16px;
+
+    .dashboard-header {
+      flex-direction: column;
+
+      .header-content .title {
+        font-size: 24px;
+
+        mat-icon {
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+        }
+      }
+
+      .period-selector {
+        width: 100%;
+      }
+    }
+
+    .dashboard-content {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-actions-card .actions-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}

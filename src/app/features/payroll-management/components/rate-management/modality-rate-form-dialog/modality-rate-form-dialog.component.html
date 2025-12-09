@@ -1,0 +1,189 @@
+<!-- src/app/features/payroll-management/components/rate-management/modality-rate-form-dialog/modality-rate-form-dialog.component.html -->
+
+<div class="dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>{{ data.mode === 'create' ? 'add_circle' : data.mode === 'edit' ? 'edit' : 'history' }}</mat-icon>
+      {{ getTitle() }}
+    </h2>
+    <button mat-icon-button (click)="onCancel()" [disabled]="loading">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <mat-dialog-content>
+    <form [formGroup]="form" class="rate-form">
+
+      <!-- Modality Selection -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Modalidad Educativa</mat-label>
+          <mat-select
+            formControlName="modalityUuid"
+            [disabled]="data.mode === 'edit' || data.mode === 'new-version'">
+            <mat-option *ngFor="let modality of modalities" [value]="modality.uuid">
+              <div class="modality-option">
+                <mat-icon [color]="getModalityColor(modality)">
+                  {{ getModalityIcon(modality) }}
+                </mat-icon>
+                <span>{{ modality.name }}</span>
+                <span class="duration-badge">{{ modality.durationYears }} años</span>
+              </div>
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>business</mat-icon>
+          <mat-error *ngIf="modalityUuid?.hasError('required')">
+            La modalidad es obligatoria
+          </mat-error>
+          <mat-hint *ngIf="data.mode !== 'create'">
+            No se puede cambiar la modalidad al editar
+          </mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- Activity Type Info -->
+      <div class="info-box activity-info">
+        <mat-icon>school</mat-icon>
+        <div class="info-content">
+          <strong>Tipo de Actividad: Clase Regular</strong>
+          <p>Las tarifas por modalidad solo aplican a clases regulares del horario programado.</p>
+        </div>
+      </div>
+
+      <!-- Rate Per Hour -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Tarifa por Hora Pedagógica (45 min)</mat-label>
+          <input
+            type="number"
+            matInput
+            formControlName="ratePerHour"
+            placeholder="0.00"
+            step="0.01"
+            min="0.01">
+          <span matPrefix>S/.&nbsp;</span>
+          <mat-icon matSuffix>payments</mat-icon>
+          <mat-error *ngIf="ratePerHour?.hasError('required')">
+            La tarifa es obligatoria
+          </mat-error>
+          <mat-error *ngIf="ratePerHour?.hasError('min')">
+            La tarifa debe ser mayor a 0
+          </mat-error>
+          <mat-hint>
+            Monto en soles peruanos (PEN)
+          </mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- Date Range -->
+      <div class="form-row date-range">
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Vigente Desde</mat-label>
+          <input
+            matInput
+            [matDatepicker]="pickerFrom"
+            formControlName="effectiveFrom"
+            [min]="minDate"
+            [max]="maxDate"
+            placeholder="dd/mm/yyyy">
+          <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFrom></mat-datepicker>
+          <mat-error *ngIf="effectiveFrom?.hasError('required')">
+            La fecha de inicio es obligatoria
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Vigente Hasta (Opcional)</mat-label>
+          <input
+            matInput
+            [matDatepicker]="pickerTo"
+            formControlName="effectiveTo"
+            [min]="effectiveFrom?.value || minDate"
+            [max]="maxDate"
+            placeholder="dd/mm/yyyy">
+          <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+          <mat-datepicker #pickerTo></mat-datepicker>
+          <mat-hint>Dejar vacío para vigencia indefinida</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- Date Range Error -->
+      <div class="form-row" *ngIf="hasDateRangeError">
+        <div class="error-message">
+          <mat-icon>error</mat-icon>
+          La fecha de fin debe ser posterior a la fecha de inicio
+        </div>
+      </div>
+
+      <!-- Info Box for New Version -->
+      <div class="info-box" *ngIf="data.mode === 'new-version'">
+        <mat-icon>info</mat-icon>
+        <div class="info-content">
+          <strong>Nueva Versión</strong>
+          <p>Se cerrará la tarifa actual y se creará una nueva versión vigente desde la fecha seleccionada.</p>
+        </div>
+      </div>
+
+      <!-- Info Box for Rate Calculation -->
+      <div class="info-box calculation-info" *ngIf="ratePerHour?.value">
+        <mat-icon>calculate</mat-icon>
+        <div class="info-content">
+          <strong>Cálculo de Tarifas</strong>
+          <div class="calculation-details">
+            <div class="calc-row">
+              <span>Por hora pedagógica (45 min):</span>
+              <span class="amount">S/. {{ ratePerHour?.value | number:'1.2-2' }}</span>
+            </div>
+            <div class="calc-row">
+              <span>Por minuto:</span>
+              <span class="amount">S/. {{ (ratePerHour?.value / 45) | number:'1.4-4' }}</span>
+            </div>
+            <div class="calc-row">
+              <span>Por hora cronológica (60 min):</span>
+              <span class="amount">S/. {{ (ratePerHour?.value * 60 / 45) | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Priority Info Box -->
+      <div class="info-box priority-info">
+        <mat-icon>low_priority</mat-icon>
+        <div class="info-content">
+          <strong>Jerarquía de Tarifas</strong>
+          <p>
+            Esta tarifa se aplicará a <strong>todos los docentes</strong> de la modalidad seleccionada
+            que no tengan una tarifa específica definida.
+          </p>
+        </div>
+      </div>
+
+    </form>
+
+    <!-- Loading Spinner -->
+    <div class="loading-overlay" *ngIf="loading">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  </mat-dialog-content>
+
+  <!-- Actions -->
+  <mat-dialog-actions align="end">
+    <button
+      mat-button
+      (click)="onCancel()"
+      [disabled]="loading">
+      Cancelar
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="form.invalid || loading">
+      <mat-icon>{{ data.mode === 'create' ? 'save' : 'update' }}</mat-icon>
+      {{ getSubmitButtonText() }}
+    </button>
+  </mat-dialog-actions>
+</div>

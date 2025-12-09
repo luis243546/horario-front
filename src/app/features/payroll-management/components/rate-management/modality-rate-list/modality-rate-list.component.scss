@@ -1,0 +1,421 @@
+// src/app/features/payroll-management/components/rate-management/modality-rate-list/modality-rate-list.component.scss
+
+.modality-rate-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+}
+
+// Header Section
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+
+  .title-section {
+    flex: 1;
+
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.87);
+
+      mat-icon {
+        color: var(--accent-color, #00bcd4);
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
+    }
+
+    .subtitle {
+      margin: 0;
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 14px;
+      line-height: 1.6;
+
+      strong {
+        color: var(--accent-color, #00bcd4);
+        font-weight: 600;
+      }
+    }
+  }
+
+  button {
+    flex-shrink: 0;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Info Box
+.info-box {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #e0f7fa 0%, #e1f5fe 100%);
+  border-radius: 8px;
+  border-left: 4px solid var(--accent-color, #00bcd4);
+
+  mat-icon {
+    color: var(--accent-color, #00bcd4);
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .info-content {
+    flex: 1;
+
+    strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    p {
+      margin: 0;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.6);
+      line-height: 1.5;
+
+      strong {
+        display: inline;
+        color: var(--accent-color, #00bcd4);
+      }
+    }
+  }
+}
+
+// Filters Card
+.filters-card {
+  padding: 20px;
+
+  .filters-container {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .search-field {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .filter-field {
+      min-width: 220px;
+    }
+
+    .status-chips {
+      margin-left: auto;
+
+      mat-chip-option {
+        cursor: pointer;
+
+        mat-icon {
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+}
+
+// Modality Option in Select
+.modality-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  span:not(.duration-badge) {
+    flex: 1;
+  }
+
+  .duration-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    background-color: rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+// Table Card
+.table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+// Loading Container
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+
+  p {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.54);
+    font-size: 14px;
+  }
+}
+
+// Table Container
+.table-container {
+  overflow-x: auto;
+}
+
+.rates-table {
+  width: 100%;
+  background-color: white;
+
+  th {
+    background-color: #fafafa;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.87);
+    font-size: 13px;
+    padding: 16px;
+  }
+
+  td {
+    padding: 16px;
+    font-size: 14px;
+  }
+
+  tr:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+// Modality Cell
+.modality-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .modality-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .modality-name {
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    .modality-duration {
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.54);
+    }
+  }
+}
+
+// Amount
+.amount {
+  font-weight: 600;
+  color: #4caf50;
+  font-size: 15px;
+}
+
+// Status Chips
+mat-chip {
+  font-size: 12px;
+  font-weight: 500;
+
+  &.status-active {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &.status-expired {
+    background-color: #f5f5f5;
+    color: #757575;
+  }
+}
+
+// Empty State
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: rgba(0, 0, 0, 0.26);
+    margin-bottom: 16px;
+  }
+
+  p {
+    margin: 0 0 24px 0;
+    color: rgba(0, 0, 0, 0.54);
+    font-size: 14px;
+  }
+
+  button {
+    mat-icon {
+      width: 20px;
+      height: 20px;
+      font-size: 20px;
+      margin: 0 8px 0 0;
+    }
+  }
+}
+
+// Menu Actions
+.delete-action {
+  color: #d32f2f;
+
+  mat-icon {
+    color: #d32f2f;
+  }
+}
+
+// Paginator
+mat-paginator {
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .header-section {
+    flex-direction: column;
+    align-items: stretch;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .modality-rate-list-container {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .filters-card {
+    padding: 16px;
+
+    .filters-container {
+      flex-direction: column;
+      align-items: stretch;
+
+      .search-field,
+      .filter-field {
+        width: 100%;
+        min-width: auto;
+      }
+
+      .status-chips {
+        margin-left: 0;
+        width: 100%;
+
+        mat-chip-listbox {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  .rates-table {
+    th, td {
+      padding: 12px 8px;
+      font-size: 13px;
+    }
+
+    .modality-cell {
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modality-rate-list-container {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Hover Effects
+button:not([disabled]) {
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+mat-card {
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Disabled State
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+// Custom Scrollbar
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+
+  &:hover {
+    background: #555;
+  }
+}

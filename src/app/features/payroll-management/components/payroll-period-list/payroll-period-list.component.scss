@@ -1,0 +1,340 @@
+.period-list-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .header-content {
+      .title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        color: #333;
+
+        mat-icon {
+          font-size: 32px;
+          width: 32px;
+          height: 32px;
+          color: #1976d2;
+        }
+      }
+
+      .subtitle {
+        font-size: 15px;
+        color: #666;
+        margin: 0;
+      }
+    }
+  }
+
+  .filters-card {
+    margin-bottom: 24px;
+
+    mat-card-content {
+      padding: 20px !important;
+
+      .filters-row {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+
+        .filter-group {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+
+          .filter-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          &.search-group {
+            flex: 1;
+            min-width: 250px;
+            flex-direction: row;
+            align-items: center;
+
+            .search-icon {
+              color: #999;
+              margin-right: 8px;
+            }
+
+            .search-input {
+              flex: 1;
+              border: none;
+              outline: none;
+              font-size: 15px;
+              padding: 8px;
+              border-bottom: 2px solid #e0e0e0;
+              transition: border-color 0.3s;
+
+              &:focus {
+                border-bottom-color: #1976d2;
+              }
+
+              &::placeholder {
+                color: #999;
+              }
+            }
+          }
+        }
+
+        .year-chips {
+          display: flex;
+          gap: 8px;
+
+          mat-chip {
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: #f5f5f5;
+            color: #666;
+
+            &:hover {
+              background-color: #e0e0e0;
+            }
+
+            &.selected {
+              background-color: #1976d2;
+              color: white;
+              font-weight: 600;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+
+    p {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #666;
+    }
+  }
+
+  .table-card {
+    .table-container {
+      overflow-x: auto;
+
+      .periods-table {
+        width: 100%;
+
+        th {
+          background-color: #f8f9fa;
+          font-weight: 600;
+          color: #333;
+          padding: 16px;
+        }
+
+        td {
+          padding: 16px;
+        }
+
+        .period-row {
+          transition: background-color 0.2s;
+
+          &:hover {
+            background-color: #f5f5f5;
+          }
+        }
+
+        // Column Styles
+        .period-name-cell {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          .period-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: #333;
+          }
+
+          .period-description {
+            font-size: 13px;
+            color: #999;
+          }
+        }
+
+        .type-chip {
+          height: 28px;
+          font-size: 13px;
+          background-color: #e3f2fd;
+          color: #1976d2;
+        }
+
+        .date-range-cell {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .date-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #555;
+
+            .date-icon {
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
+              color: #1976d2;
+            }
+          }
+
+          .arrow-icon {
+            color: #999;
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+
+        .duration-badge {
+          display: inline-block;
+          padding: 6px 12px;
+          border-radius: 12px;
+          background-color: #f3e5f5;
+          color: #7b1fa2;
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        .calculated-date {
+          font-size: 14px;
+          color: #555;
+        }
+
+        .not-calculated {
+          font-size: 14px;
+          color: #999;
+          font-style: italic;
+        }
+
+        .delete-action {
+          color: #d32f2f;
+
+          mat-icon {
+            color: #d32f2f;
+          }
+        }
+      }
+
+      .no-data-message {
+        text-align: center;
+        padding: 60px 20px;
+
+        mat-icon {
+          font-size: 80px;
+          width: 80px;
+          height: 80px;
+          color: #ccc;
+          margin-bottom: 20px;
+        }
+
+        p {
+          font-size: 16px;
+          color: #999;
+          margin-bottom: 20px;
+        }
+      }
+    }
+  }
+
+  .info-card {
+    margin-top: 24px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+
+    mat-card-content {
+      padding: 20px !important;
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+
+        .info-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+
+          mat-icon {
+            color: #1976d2;
+            margin-top: 2px;
+          }
+
+          .info-text {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+
+            strong {
+              display: block;
+              color: #333;
+              margin-bottom: 4px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .period-list-container {
+    padding: 16px;
+
+    .page-header {
+      flex-direction: column;
+
+      .header-content .title {
+        font-size: 22px;
+
+        mat-icon {
+          font-size: 26px;
+          width: 26px;
+          height: 26px;
+        }
+      }
+    }
+
+    .filters-card mat-card-content .filters-row {
+      flex-direction: column;
+      align-items: stretch;
+
+      .filter-group.search-group {
+        min-width: 100%;
+      }
+    }
+
+    .table-card .table-container .periods-table {
+      font-size: 13px;
+
+      th, td {
+        padding: 12px 8px;
+      }
+    }
+  }
+}

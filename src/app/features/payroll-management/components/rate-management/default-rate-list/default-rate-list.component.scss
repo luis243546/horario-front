@@ -1,0 +1,373 @@
+// src/app/features/payroll-management/components/rate-management/default-rate-list/default-rate-list.component.scss
+
+.default-rate-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+}
+
+// Header Section
+.header-section {
+  .title-section {
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.87);
+
+      mat-icon {
+        color: #9c27b0;
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
+    }
+
+    .subtitle {
+      margin: 0;
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 14px;
+      line-height: 1.6;
+
+      strong {
+        color: #9c27b0;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Info Box
+.info-box {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+  border-radius: 8px;
+  border-left: 4px solid #9c27b0;
+
+  mat-icon {
+    color: #9c27b0;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .info-content {
+    flex: 1;
+
+    strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    p {
+      margin: 0;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.6);
+      line-height: 1.5;
+
+      strong {
+        display: inline;
+        color: #9c27b0;
+      }
+    }
+  }
+
+  &.coverage-info {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    border-left-color: #4caf50;
+
+    mat-icon {
+      color: #4caf50;
+    }
+
+    strong {
+      color: rgba(0, 0, 0, 0.87) !important;
+    }
+  }
+}
+
+// Table Card
+.table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+// Loading Container
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+
+  p {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.54);
+    font-size: 14px;
+  }
+}
+
+// Table Container
+.table-container {
+  overflow-x: auto;
+}
+
+.rates-table {
+  width: 100%;
+  background-color: white;
+
+  th {
+    background-color: #fafafa;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.87);
+    font-size: 13px;
+    padding: 16px;
+  }
+
+  td {
+    padding: 16px;
+    font-size: 14px;
+  }
+
+  tr:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+// Activity Cell
+.activity-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .activity-name {
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.87);
+  }
+}
+
+// Amount
+.amount {
+  font-weight: 600;
+  color: #4caf50;
+  font-size: 15px;
+}
+
+// Status Chips
+mat-chip {
+  font-size: 12px;
+  font-weight: 500;
+
+  &.status-active {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &.status-expired {
+    background-color: #f5f5f5;
+    color: #757575;
+  }
+}
+
+// Empty State
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: rgba(0, 0, 0, 0.26);
+    margin-bottom: 16px;
+  }
+
+  p {
+    margin: 0 0 8px 0;
+    color: rgba(0, 0, 0, 0.54);
+    font-size: 14px;
+
+    &.warning-text {
+      color: #ff9800;
+      font-weight: 500;
+      margin-top: 12px;
+    }
+  }
+}
+
+// Help Card
+.help-card {
+  padding: 20px;
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+
+  h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.87);
+
+    mat-icon {
+      color: #9c27b0;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .help-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .help-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+
+      mat-icon {
+        color: #9c27b0;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      div {
+        flex: 1;
+
+        strong {
+          display: block;
+          font-size: 14px;
+          color: rgba(0, 0, 0, 0.87);
+          margin-bottom: 4px;
+        }
+
+        p {
+          margin: 0;
+          font-size: 13px;
+          color: rgba(0, 0, 0, 0.6);
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+}
+
+// Paginator
+mat-paginator {
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .default-rate-list-container {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .rates-table {
+    th, td {
+      padding: 12px 8px;
+      font-size: 13px;
+    }
+
+    .activity-cell {
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  .help-card {
+    padding: 16px;
+
+    .help-content {
+      gap: 12px;
+    }
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.default-rate-list-container {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Hover Effects
+button:not([disabled]) {
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+mat-card {
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Disabled State
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+// Custom Scrollbar
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+
+  &:hover {
+    background: #555;
+  }
+}
