@@ -483,7 +483,7 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
       route: '/dashboard',
       exact: true,
       description: 'Panel principal del sistema',
-      roles: ['COORDINATOR', 'ASSISTANT', 'TEACHER']
+      roles: ['COORDINATOR', 'ASSISTANT', 'TEACHER', 'ACCOUNTANT']
     },
     {
       title: 'Modalidades',
@@ -574,6 +574,14 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
       exact: false,
       description: 'Registrar entrada y salida',
       roles: ['TEACHER'] // Solo para docentes
+    },
+    {
+      title: 'Nómina',
+      icon: 'account_balance_wallet',
+      route: '/dashboard/nomina',
+      exact: false,
+      description: 'Gestión de nómina y pagos a docentes',
+      roles: ['COORDINATOR', 'ASSISTANT', 'ACCOUNTANT']  // ✅ Item para contadores
     }
   ];
 
@@ -587,7 +595,9 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     '/dashboard/cursos': 'Gestión de Cursos',
     '/dashboard/ambientes': 'Ambientes de Aprendizaje',
     '/dashboard/turnos': 'Turnos y Horarios',
-    '/dashboard/horarios': 'Asignación de Horarios'
+    '/dashboard/horarios': 'Asignación de Horarios',
+    '/dashboard/asistencia/mi-asistencia': 'Mi Asistencia',
+    '/dashboard/nomina': 'Gestión de Nómina'
   };
 
   private pageDescriptions: Record<string, string> = {
@@ -839,7 +849,8 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     const icons: Record<string, string> = {
       COORDINATOR: 'admin_panel_settings',
       ASSISTANT: 'settings',
-      TEACHER: 'school'
+      TEACHER: 'school',
+      ACCOUNTANT: 'account_balance_wallet'
     };
 
     return icons[role || 'TEACHER'] || 'person';
